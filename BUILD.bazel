@@ -1,22 +1,39 @@
+# load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+
+# pybind_extension(
+#     name = "my_pylib",  # This name is not actually created!
+#     srcs = ["my_pb_mod.cc"],
+# )
+
+# py_library(
+#     name = "my_pylib",
+#     data = [":my_pylib.so"],
+#     srcs_version = "PY3",
+# )
+
+# py_test(
+#     name = "example_test",
+#     srcs = ["example_test.py"],
+#     deps = [
+#         ":my_pylib"
+#     ],
+#     python_version = "PY3",
+#     srcs_version = "PY3",
+# )
+
+
+###########################################################################
 load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 pybind_extension(
-    name = "my_pylib",  # This name is not actually created!
-    srcs = ["my_pb_mod.cc"],
-)
-
-py_library(
     name = "my_pylib",
-    data = [":my_pylib.so"],
-    srcs_version = "PY3",
+    srcs = ["my_pb_mod.cc"],
 )
 
 py_test(
     name = "example_test",
     srcs = ["example_test.py"],
-    deps = [
-        ":my_pylib"
-    ],
+    data = [":my_pylib.so"],
     python_version = "PY3",
     srcs_version = "PY3",
 )

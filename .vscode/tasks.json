@@ -9,6 +9,15 @@
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+        {
+            "label": "Build main",
+            "type": "shell",
+            "command": "bazel build //app:main",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
     ]
 }
