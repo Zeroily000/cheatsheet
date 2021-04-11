@@ -19,5 +19,14 @@
                 "isDefault": true
             }
         },
+        {
+            "label": "Build pygreet",
+            "type": "shell",
+            "command": "bazel build //pybind/greet:test -c dbg",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
     ]
 }

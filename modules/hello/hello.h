@@ -6,5 +6,5 @@ class Hello {
 public:
     Hello();
     ~Hello();
-    std::string operator()();
+    std::string operator()() const;
 };
