@@ -15,7 +15,7 @@
 
 # print('done!', file=sys.stderr)
 
-import my_pb_mod
-result = my_pb_mod.add(2, 3)
+import my_pylib
+result = my_pylib.add(2, 3)
 print(result)
 assert result == 5

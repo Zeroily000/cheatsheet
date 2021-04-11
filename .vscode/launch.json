@@ -8,7 +8,7 @@
             "request": "launch",
             "sourceFileMap": {"/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"},
             "program": "/usr/bin/env",
-            "args": ["python", "${workspaceFolder}/bazel-out/k8-dbg/bin/example_test"],
+            "args": ["python3", "${workspaceFolder}/bazel-out/k8-dbg/bin/example_test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
