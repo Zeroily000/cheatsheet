@@ -2,28 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Example",
-            "preLaunchTask": "Build Example (Debug)",
-            "type": "cppdbg",
-            "request": "launch",
-            "sourceFileMap": {"/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"},
-            "program": "/usr/bin/env",
-            "args": ["python3", "${workspaceFolder}/bazel-out/k8-dbg/bin/example_test"],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-        },
-        {
-            "name": "Test pygreet",
+            "name": "Debug pygreet",
             "preLaunchTask": "Build pygreet",
             "type": "cppdbg",
             "request": "launch",
