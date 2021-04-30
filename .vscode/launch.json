@@ -8,15 +8,9 @@
             "request": "launch",
             "sourceFileMap": {"/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"},
             "program": "/usr/bin/env",
-            "args": ["python", "${workspaceFolder}/bazel-out/k8-dbg/bin/pybind/greet/test"],
+            "args": ["python3", "${workspaceFolder}/bazel-out/k8-dbg/bin/pybind/greet/test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    "name": "PYTHONPATH",
-                    "value": "${workspaceFolder}/bazel-out/k8-dbg/bin/pybind/greet"
-                }
-            ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [

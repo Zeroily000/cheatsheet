@@ -10,6 +10,7 @@ py_test(
     name = "test",
     srcs = ["test.py"],
     data = [":my_pylib.so"],
+    imports = [":my_pylib.so"],
     python_version = "PY3",
     srcs_version = "PY3",
 )
