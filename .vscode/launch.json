@@ -6,9 +6,11 @@
             "preLaunchTask": "Build pygreet",
             "type": "cppdbg",
             "request": "launch",
-            "sourceFileMap": {"/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"},
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}"
+            },
             "program": "/usr/bin/env",
-            "args": ["python3", "${workspaceFolder}/bazel-out/k8-dbg/bin/pybind/greet/test"],
+            "args": ["python3", "${workspaceFolder}/bazel-bin/pybind/greet/test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "externalConsole": false,

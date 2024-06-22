@@ -12,8 +12,14 @@
         },
         {
             "label": "Build pygreet",
-            "type": "shell",
-            "command": "bazel build //pybind/greet:test -c dbg",
+            "type": "bazel",
+            "command": "build",
+            "targets": ["//pybind/greet:test"],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--strip=never"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true

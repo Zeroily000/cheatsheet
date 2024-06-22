@@ -1,0 +1,8 @@
+"""
+This module manages external dependencies.
+"""
+module(name = "pybind-bazel-vscode")
+
+bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "rules_python", version = "0.31.0")
+bazel_dep(name = "pybind11_bazel", version = "2.12.0")
