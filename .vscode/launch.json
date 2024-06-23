@@ -10,7 +10,7 @@
                 "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
             "program": "/usr/bin/env",
-            "args": ["python3", "${workspaceFolder}/bazel-bin/pybind/greet/test"],
+            "args": ["python3", "${workspaceFolder}/bazel-bin/modules/greet/test/test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "externalConsole": false,

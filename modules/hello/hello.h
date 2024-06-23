@@ -6,5 +6,8 @@ class Hello {
 public:
     Hello();
     ~Hello();
-    std::string operator()() const;
+    std::string const & operator()() const;
+
+private:
+    std::string value_;
 };

@@ -1,8 +1,8 @@
-#include "world.h"
+#include "modules/world/world.h"
 
-World::World() = default;
+World::World() : value_("world") {}
 World::~World() = default;
 
-std::string World::operator()() const {
-    return "world";
+std::string const & World::operator()() const {
+    return value_;
 }

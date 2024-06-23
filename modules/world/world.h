@@ -6,5 +6,8 @@ class World {
 public:
     World();
     ~World();
-    std::string operator()() const;
+    std::string const & operator()() const;
+
+private:
+    std::string value_;
 };

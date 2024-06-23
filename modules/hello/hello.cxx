@@ -1,8 +1,9 @@
-#include "hello.h"
+#include "modules/hello/hello.h"
 
-Hello::Hello() = default;
+Hello::Hello() : value_("hello") {}
+
 Hello::~Hello() = default;
 
-std::string Hello::operator()() const {
-    return "hello";
+std::string const & Hello::operator()() const {
+    return value_;
 }

@@ -1,6 +1,7 @@
+#include "modules/greet/greet.h"
+
 #include <iostream>
 
-#include "greet.h"
 #include "modules/hello/hello.h"
 #include "modules/world/world.h"
 

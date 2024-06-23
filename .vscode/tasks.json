@@ -14,7 +14,7 @@
             "label": "Build pygreet",
             "type": "bazel",
             "command": "build",
-            "targets": ["//pybind/greet:test"],
+            "targets": ["//modules/greet/test:test"],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
