@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+              "${workspaceFolder}/**",
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_bazel*/include/**",
+              "/usr/include/python3.10/"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/local/bin/gcc",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}

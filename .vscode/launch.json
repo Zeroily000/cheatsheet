@@ -7,7 +7,7 @@
             "type": "cppdbg",
             "request": "launch",
             "sourceFileMap": {
-                "/proc/self/cwd": "${workspaceFolder}"
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
             "program": "/usr/bin/env",
             "args": ["python3", "${workspaceFolder}/bazel-bin/pybind/greet/test"],
