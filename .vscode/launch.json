@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug pygreet",
+            "name": "Debug pygreet (gdb)",
             "preLaunchTask": "Build pygreet",
             "type": "cppdbg",
             "request": "launch",
@@ -10,7 +10,10 @@
                 "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
             "program": "/usr/bin/env",
-            "args": ["python3", "${workspaceFolder}/bazel-bin/modules/greet/test/test"],
+            "args": [
+                "python3",
+                "${workspaceFolder}/bazel-bin/modules/greet/test/test"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "externalConsole": false,
@@ -22,6 +25,23 @@
                     "ignoreFailures": true
                 }
             ],
+        },
+        {
+            "name": "Debug pygreet (lldb)",
+            "preLaunchTask": "Build pygreet",
+            "type": "lldb",
+            "request": "launch",
+            "sourceMap": {
+                "/proc/self/cwd": "${workspaceFolder}"
+            },
+            "program": "/usr/bin/env",
+            "args": [
+                "python3",
+                "${workspaceFolder}/bazel-bin/modules/greet/test/test"
+            ],
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
         }
     ]
 }
