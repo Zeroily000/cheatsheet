@@ -5,6 +5,7 @@
             "includePath": [
               "${workspaceFolder}/**",
               "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_bazel*/include/**",
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/rules_boost*/libs/**",
               "/usr/include/python3.10/"
             ],
             "intelliSenseMode": "linux-gcc-x64",
