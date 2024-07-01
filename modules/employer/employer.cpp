@@ -8,12 +8,20 @@ int Employer::AddEmployee(std::string const & name) {
   return id;
 }
 
-Employee const & Employer::GetEmployee(int id) const {
-  auto const itr{employees_.get<0>().find(id)};
+absl::StatusOr<Employee> const Employer::GetEmployee(int id) const {
+  auto const & id_index{employees_.get<0>()};
+  auto const itr{id_index.find(id)};
+  if (itr == id_index.cend()) {
+    return absl::NotFoundError("Employee does not exist");
+  }
   return *itr;
 }
 
-Employee const & Employer::GetEmployee(std::string const & name) const {
-  auto const itr{employees_.get<1>().find(name)};
+absl::StatusOr<Employee> const Employer::GetEmployee(std::string const & name) const {
+  auto const & name_index{employees_.get<1>()};
+  auto const itr{name_index.find(name)};
+  if (itr == name_index.cend()) {
+    return absl::NotFoundError("Employee does not exist");
+  }
   return *itr;
 }

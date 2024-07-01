@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "//modules/common:id_generator",
         "//modules/employee",
+        "@abseil-cpp//absl/status:statusor",
         "@boost//:multi_index",
     ],
 )
@@ -19,5 +20,6 @@ pybind_extension(
     srcs = ["pywrapper.cpp"],
     deps = [
         "//modules/employer",
+        "@pybind11_abseil//pybind11_abseil:status_casters"
     ],
 )

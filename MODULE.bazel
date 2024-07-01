@@ -3,9 +3,21 @@ This module manages external dependencies.
 """
 module(name = "pybind-bazel-vscode")
 
+
+# https://registry.bazel.build/modules/rules_cc
 bazel_dep(name = "rules_cc", version = "0.0.9")
-bazel_dep(name = "rules_python", version = "0.31.0")
+
+# https://registry.bazel.build/modules/rules_python
+bazel_dep(name = "rules_python", version = "0.33.2")
+
+# https://registry.bazel.build/modules/pybind11_bazel
 bazel_dep(name = "pybind11_bazel", version = "2.12.0")
+
+# https://registry.bazel.build/modules/abseil-cpp
+bazel_dep(name = "abseil-cpp", version = "20240116.0")
+
+# https://registry.bazel.build/modules/pybind11_abseil
+bazel_dep(name = "pybind11_abseil", version = "202402.0")
 
 # Boost
 # Famous C++ library that has given rise to many new additions to the C++ Standard Library

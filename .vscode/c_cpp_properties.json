@@ -6,6 +6,8 @@
               "${workspaceFolder}/**",
               "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_bazel~~internal_configure_extension~pybind11/include/**",
               "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/rules_boost~~non_module_dependencies~boost/libs/**",
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/abseil-cpp~",
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_abseil~"
             //   "/usr/include/python3.10/"
             ],
             "intelliSenseMode": "linux-gcc-x64",
