@@ -1,4 +1,4 @@
-#include "modules/world/world.h"
+#include "modules/world/world.hpp"
 
 World::World() : value_("world") {}
 World::~World() = default;

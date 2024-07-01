@@ -6,7 +6,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "employer",
     srcs = ["employer.cpp"],
-    hdrs = ["employer.h"],
+    hdrs = ["employer.hpp"],
     deps = [
         "//modules/common:id_generator",
         "//modules/employee",
@@ -17,7 +17,7 @@ cc_library(
 
 pybind_extension(
     name = "pyemployer",
-    srcs = ["pywrapper.cpp"],
+    srcs = ["pyregister.cpp"],
     deps = [
         "//modules/employer",
         "@pybind11_abseil//pybind11_abseil:status_casters"

@@ -5,13 +5,13 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "employee",
-    srcs = ["employee.cxx"],
-    hdrs = ["employee.h"],
+    srcs = ["employee.cpp"],
+    hdrs = ["employee.hpp"],
 )
 
 pybind_extension(
     name = "pyemployee",
-    srcs = ["pywrapper.cpp"],
+    srcs = ["pyregister.cpp"],
     deps = [
         "//modules/employee",
     ]

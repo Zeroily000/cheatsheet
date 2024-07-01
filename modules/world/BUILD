@@ -1,10 +1,11 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "world",
-    srcs = ["world.cxx"],
-    hdrs = ["world.h"],
-    visibility = ["//visibility:public"]
+    srcs = ["world.cpp"],
+    hdrs = ["world.hpp"],
 )
 
 # ==>

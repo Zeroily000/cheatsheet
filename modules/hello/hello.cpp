@@ -1,4 +1,4 @@
-#include "modules/hello/hello.h"
+#include "modules/hello/hello.hpp"
 
 Hello::Hello() : value_("hello") {}
 

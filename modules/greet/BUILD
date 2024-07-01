@@ -5,8 +5,8 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "greet",
-    srcs = ["greet.cxx"],
-    hdrs = ["greet.h"],
+    srcs = ["greet.cpp"],
+    hdrs = ["greet.hpp"],
     deps = [
         "//modules/hello:hello",
         "//modules/world:world"
@@ -15,7 +15,7 @@ cc_library(
 
 pybind_extension(
     name = "pygreet",
-    srcs = ["pywrapper.cxx"],
+    srcs = ["pyregister.cpp"],
     deps = [
         "//modules/greet:greet"
     ]
