@@ -8,9 +8,10 @@ cc_library(
     srcs = ["employer.cpp"],
     hdrs = ["employer.h"],
     deps = [
-      "//modules/employee",
-      "@boost//:multi_index"
-    ]
+        "//modules/common:id_generator",
+        "//modules/employee",
+        "@boost//:multi_index",
+    ],
 )
 
 pybind_extension(
@@ -18,5 +19,5 @@ pybind_extension(
     srcs = ["pywrapper.cpp"],
     deps = [
         "//modules/employer",
-    ]
+    ],
 )

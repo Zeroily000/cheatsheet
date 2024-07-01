@@ -4,9 +4,9 @@
             "name": "Linux",
             "includePath": [
               "${workspaceFolder}/**",
-              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_bazel*/include/**",
-              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/rules_boost*/libs/**",
-              "/usr/include/python3.10/"
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_bazel~~internal_configure_extension~pybind11/include/**",
+              "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/rules_boost~~non_module_dependencies~boost/libs/**",
+            //   "/usr/include/python3.10/"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/local/bin/gcc",

@@ -1,9 +1,11 @@
 #include "modules/employer/employer.h"
 
-Employer::Employer() = default;
+Employer::Employer() : id_generator_(1) {}
 
-void Employer::AddEmployee(int id, std::string const & name) {
+int Employer::AddEmployee(std::string const & name) {
+  int const id{id_generator_()};
   employees_.emplace(id, name);
+  return id;
 }
 
 Employee const & Employer::GetEmployee(int id) const {
