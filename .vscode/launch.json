@@ -2,8 +2,8 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug pygreet (gdb)",
-            "preLaunchTask": "Build pygreet",
+            "name": "Debug greet test (gdb)",
+            "preLaunchTask": "Build greet test",
             "type": "cppdbg",
             "request": "launch",
             "sourceFileMap": {
@@ -27,8 +27,8 @@
             ],
         },
         {
-            "name": "Debug pygreet (lldb)",
-            "preLaunchTask": "Build pygreet",
+            "name": "Debug greet test (lldb)",
+            "preLaunchTask": "Build greet test",
             "type": "lldb",
             "request": "launch",
             "sourceMap": {
@@ -42,6 +42,31 @@
             "stopOnEntry": false,
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
+        },
+        {
+            "name": "Debug employer test (gdb)",
+            "preLaunchTask": "Build employer test",
+            "type": "cppdbg",
+            "request": "launch",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
+            },
+            "program": "/usr/bin/env",
+            "args": [
+                "python3",
+                "${workspaceFolder}/bazel-bin/modules/employer/test/test"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
         }
     ]
 }

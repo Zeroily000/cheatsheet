@@ -2,16 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build main",
-            "type": "shell",
-            "command": "bazel build //app:main",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "Build pygreet",
+            "label": "Build greet test",
             "type": "bazel",
             "command": "build",
             "targets": ["//modules/greet/test:test"],
@@ -22,8 +13,39 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             }
         },
+        {
+            "label": "Build employer test",
+            "type": "bazel",
+            "command": "build",
+            "targets": ["//modules/employer/test:test"],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        ////////////////////////////////////////////////////
+        {
+            "label": "Test all",
+            "type": "bazel",
+            "command": "test",
+            "targets": ["//..."],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            }
+        }
     ]
 }
