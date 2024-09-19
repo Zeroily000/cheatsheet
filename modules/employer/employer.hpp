@@ -1,5 +1,6 @@
 #pragma once
 
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "boost/multi_index_container.hpp"
 #include "boost/multi_index/hashed_index.hpp"
@@ -17,9 +18,11 @@ class Employer {
 
   int AddEmployee(std::string const & name);
 
-  absl::StatusOr<Employee> const GetEmployee(int id) const;
+  absl::Status RemoveEmployee(std::string const & name);
 
-  absl::StatusOr<Employee> const GetEmployee(std::string const & name) const;
+  absl::StatusOr<Employee> GetEmployee(int id) const;
+
+  absl::StatusOr<Employee> GetEmployee(std::string const & name) const;
 
  private:
   common::IdGenerator<int> id_generator_;
@@ -27,7 +30,7 @@ class Employer {
     Employee,
     boost::multi_index::indexed_by<
       boost::multi_index::ordered_unique<boost::multi_index::member<Employee, int, &Employee::id>>,
-      boost::multi_index::hashed_unique<boost::multi_index::member<Employee, std::string, &Employee::name>>
+      boost::multi_index::hashed_non_unique<boost::multi_index::member<Employee, std::string, &Employee::name>>
     >
   > employees_;
 };

@@ -9,6 +9,13 @@ if __name__ == '__main__':
     print(f'Employee {id}\'s name is {employer.get_employee(id).name}')
     print(f'Employee {name}\'s id is {employer.get_employee(name).id}')
 
+    name = 'A'
+    id = employer.add_employee(name)
+    print(f'Employee {id}\'s name is {employer.get_employee(id).name}')
+    print(f'Employee {name}\'s id is {employer.get_employee(name).id}')
+
+    employer.remove_employee(name)
+
     try:
       employer.get_employee(0)
     except status.StatusNotOk as e:
