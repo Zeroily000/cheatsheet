@@ -5,16 +5,16 @@ module(name = "pybind-bazel-vscode")
 
 
 # https://registry.bazel.build/modules/rules_cc
-bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "rules_cc", version = "0.0.10")
 
 # https://registry.bazel.build/modules/rules_python
-bazel_dep(name = "rules_python", version = "0.33.2")
+bazel_dep(name = "rules_python", version = "0.35.0")
 
 # https://registry.bazel.build/modules/pybind11_bazel
 bazel_dep(name = "pybind11_bazel", version = "2.12.0")
 
 # https://registry.bazel.build/modules/abseil-cpp
-bazel_dep(name = "abseil-cpp", version = "20240116.0")
+bazel_dep(name = "abseil-cpp", version = "20240722.0")
 
 # https://registry.bazel.build/modules/pybind11_abseil
 bazel_dep(name = "pybind11_abseil", version = "202402.0")
