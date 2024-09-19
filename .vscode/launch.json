@@ -9,9 +9,8 @@
             "sourceFileMap": {
                 "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
-            "program": "/usr/bin/env",
+            "program": "/usr/bin/python3",
             "args": [
-                "python3",
                 "${workspaceFolder}/bazel-bin/modules/greet/test/test"
             ],
             "stopAtEntry": false,
