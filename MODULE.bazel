@@ -19,6 +19,9 @@ bazel_dep(name = "abseil-cpp", version = "20240722.0")
 # https://registry.bazel.build/modules/pybind11_abseil
 bazel_dep(name = "pybind11_abseil", version = "202402.0")
 
+# https://registry.bazel.build/modules/googletest
+bazel_dep(name = "googletest", version = "1.15.2")
+
 # Boost
 # Famous C++ library that has given rise to many new additions to the C++ Standard Library
 # Makes @boost available for use: For example, add `@boost//:algorithm` to your deps.

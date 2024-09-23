@@ -31,6 +31,21 @@
                 "isDefault": false
             }
         },
+        {
+            "label": "Build examples/boost_multi_index_container:main",
+            "type": "bazel",
+            "command": "build",
+            "targets": ["//examples/boost_multi_index_container:main"],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
         ////////////////////////////////////////////////////
         {
             "label": "Test all",

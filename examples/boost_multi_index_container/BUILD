@@ -2,8 +2,8 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 
 cc_binary(
-    name = "basic",
-    srcs = ["basic.cpp"],
+    name = "main",
+    srcs = ["main.cpp"],
     deps = [
         "@boost//:multi_index",
     ],

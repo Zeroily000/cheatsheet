@@ -66,6 +66,28 @@
                     "ignoreFailures": true
                 }
             ],
+        },
+        {
+            "name": "Debug examples/boost_multi_index_container:main (gdb)",
+            "preLaunchTask": "Build examples/boost_multi_index_container:main",
+            "type": "cppdbg",
+            "request": "launch",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
+            },
+            "program": "${workspaceFolder}/bazel-bin/examples/boost_multi_index_container/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
         }
     ]
 }
