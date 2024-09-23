@@ -10,7 +10,7 @@
             //   "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/pybind11_abseil~",
             ],
             "intelliSenseMode": "linux-gcc-x64",
-            "compilerPath": "/usr/local/bin/gcc",
+            "compilerPath": "/usr/bin/gcc",
             "cppStandard": "c++20"
         }
     ],

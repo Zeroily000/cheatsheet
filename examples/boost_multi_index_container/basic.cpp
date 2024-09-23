@@ -12,7 +12,7 @@
 
 class Foo {
    public:
-    Foo(std::string name, int id) : name{std::move(name)}, id(id) {}
+    Foo(std::string name, int id) : name{std::move(name)}, id{id} {}
 
     int GetId() const {
         return id;
