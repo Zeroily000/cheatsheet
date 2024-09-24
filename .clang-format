@@ -1,0 +1,9 @@
+BasedOnStyle: Google
+
+IndentWidth: 2
+ColumnLimit: 100
+
+QualifierAlignment: Right
+
+DerivePointerAlignment: false
+PointerAlignment: Middle
