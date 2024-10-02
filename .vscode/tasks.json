@@ -46,6 +46,21 @@
                 "isDefault": false
             }
         },
+        {
+            "label": "Build examples/opencv:main",
+            "type": "bazel",
+            "command": "build",
+            "targets": ["//examples/opencv:main"],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
         ////////////////////////////////////////////////////
         {
             "label": "Test all",

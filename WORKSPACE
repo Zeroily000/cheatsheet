@@ -1,5 +1,5 @@
 new_local_repository(
     name = "opencv",
-    path = "/usr/local/lib/",
+    path = "/usr",
     build_file = "//third_party:opencv.BUILD",
 )

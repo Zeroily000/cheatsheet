@@ -24,6 +24,11 @@ RUN mv bazel-archive-keyring.gpg /usr/share/keyrings
 RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
 RUN apt-get update && apt-get install -y bazel
 
+# Install OpenCV
+RUN apt-get update && apt-get install \
+    libcanberra-gtk3-module \
+    libopencv-dev
+
 # Create user with sudo privileges
 RUN apt-get update && apt-get install -y \
     sudo
