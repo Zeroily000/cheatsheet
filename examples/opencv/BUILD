@@ -1,9 +1,12 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
-    name = "main",
-    srcs = ["main.cpp"],
-    deps = [
-        "@opencv",
-    ],
+  name = "main",
+  srcs = ["main.cpp"],
+  deps = [
+    "@opencv",
+  ],
+  data = [
+    "//data:lena",
+  ],
 )

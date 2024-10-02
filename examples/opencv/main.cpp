@@ -3,7 +3,7 @@
 #include <opencv2/imgcodecs.hpp>
 
 int main() {
-  static char constexpr filename[]{"/workspace/data/lena.png"};
+  static char constexpr filename[]{"data/lena.png"};
   cv::Mat const image{cv::imread(filename, cv::IMREAD_COLOR)};
 
   cv::imshow("Display", image);

@@ -10,9 +10,16 @@ RUN apt-get update && apt-get install -y \
     make \
     gdb \
     lldb \
-    git \
+    git
+
+# Setup GUI
+RUN apt-get update && apt-get install -y \
     locales \
+    libcanberra-gtk3-module \
     x11-apps
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV NO_AT_BRIDGE=1
 
 # Install Bazel
 RUN apt-get update && apt-get install -y \
@@ -22,11 +29,11 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor >bazel-archive-keyring.gpg
 RUN mv bazel-archive-keyring.gpg /usr/share/keyrings
 RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
-RUN apt-get update && apt-get install -y bazel
+RUN apt-get update && apt-get install -y \
+    bazel
 
 # Install OpenCV
-RUN apt-get update && apt-get install \
-    libcanberra-gtk3-module \
+RUN apt-get update && apt-get install -y \
     libopencv-dev
 
 # Create user with sudo privileges
