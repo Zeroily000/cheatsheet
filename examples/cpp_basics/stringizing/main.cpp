@@ -23,15 +23,11 @@
 #define FB1(arg) FB(arg)
 
 int main(int argc, char ** argv) {
-  // ::testing::InitGoogleTest(&argc, argv);
-  // return RUN_ALL_TESTS();
   // FB(F B) -> #F B -> "F B"
-  // ASSERT_EQ(typeid(FB(F B)), typeid(char[4]))
   std::cout << "FB(F B) = \"" << FB(F B) << "\" (" << boost::core::demangle(typeid(FB(F B)).name())
             << ")" << std::endl;
 
   // FB1(F B) -> FB1(abc def) -> FB(abc def) -> #abc def -> "abc def"
-  // ASSERT_EQ(typeid(FB1(F B)), typeid(char[8]))
   std::cout << "FB1(F B) = \"" << FB1(F B) << "\" ("
             << boost::core::demangle(typeid(FB1(F B)).name()) << ")" << std::endl;
   return 0;
