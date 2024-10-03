@@ -5,10 +5,13 @@
             "label": "Build greet test",
             "type": "bazel",
             "command": "build",
-            "targets": ["//modules/greet/test:test"],
+            "targets": [
+                "//modules/greet/test:test"
+            ],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
+                "--copt=-g3",
                 "--strip=never"
             ],
             "group": {
@@ -20,10 +23,13 @@
             "label": "Build employer test",
             "type": "bazel",
             "command": "build",
-            "targets": ["//modules/employer/test:test"],
+            "targets": [
+                "//modules/employer/test:test"
+            ],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
+                "--copt=-g3",
                 "--strip=never"
             ],
             "group": {
@@ -35,10 +41,13 @@
             "label": "Build examples/boost_multi_index_container:main",
             "type": "bazel",
             "command": "build",
-            "targets": ["//examples/boost_multi_index_container:main"],
+            "targets": [
+                "//examples/boost_multi_index_container:main"
+            ],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
+                "--copt=-g3",
                 "--strip=never"
             ],
             "group": {
@@ -50,10 +59,31 @@
             "label": "Build examples/opencv:main",
             "type": "bazel",
             "command": "build",
-            "targets": ["//examples/opencv:main"],
+            "targets": [
+                "//examples/opencv:main"
+            ],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
+                "--copt=-g3",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Build examples/ceres_solver:main",
+            "type": "bazel",
+            "command": "build",
+            "targets": [
+                "//examples/ceres_solver:main"
+            ],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--copt=-g3",
                 "--strip=never"
             ],
             "group": {
@@ -66,10 +96,13 @@
             "label": "Test all",
             "type": "bazel",
             "command": "test",
-            "targets": ["//..."],
+            "targets": [
+                "//..."
+            ],
             "options": [
                 "--compilation_mode=dbg",
                 "--copt=-O0",
+                "--copt=-g3",
                 "--strip=never"
             ],
             "group": {

@@ -25,6 +25,9 @@ bazel_dep(name = "googletest", version = "1.15.2")
 # https://registry.bazel.build/modules/boost.multi_index
 bazel_dep(name = "boost.multi_index", version = "1.83.0")
 
+# https://registry.bazel.build/modules/ceres-solver
+bazel_dep(name = "ceres-solver", version = "2.2.0")
+
 # # Boost
 # # Famous C++ library that has given rise to many new additions to the C++ Standard Library
 # # Makes @boost available for use: For example, add `@boost//:algorithm` to your deps.
