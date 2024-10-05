@@ -1,8 +1,8 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
-  name = "main",
-  srcs = ["main.cpp"],
+  name = "cpu_rendering",
+  srcs = ["cpu_rendering.cpp"],
   deps = [
     "@opencv",
   ],
@@ -12,8 +12,8 @@ cc_binary(
 )
 
 cc_binary(
-  name = "viz3d",
-  srcs = ["viz3d.cpp"],
+  name = "gpu_rendering",
+  srcs = ["gpu_rendering.cpp"],
   deps = [
     "@opencv",
   ],

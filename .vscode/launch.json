@@ -90,14 +90,14 @@
             ],
         },
         {
-            "name": "Debug examples/opencv:main (gdb)",
-            "preLaunchTask": "Build examples/opencv:main",
+            "name": "Debug examples/opencv:cpu_rendering (gdb)",
+            "preLaunchTask": "Build examples/opencv:cpu_rendering",
             "type": "cppdbg",
             "request": "launch",
             "sourceFileMap": {
                 "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
-            "program": "${workspaceFolder}/bazel-bin/examples/opencv/main",
+            "program": "${workspaceFolder}/bazel-bin/examples/opencv/cpu_rendering",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -112,14 +112,14 @@
             ],
         },
         {
-            "name": "Debug examples/opencv:viz3d (gdb)",
-            "preLaunchTask": "Build examples/opencv:viz3d",
+            "name": "Debug examples/opencv:gpu_rendering (gdb)",
+            "preLaunchTask": "Build examples/opencv:gpu_rendering",
             "type": "cppdbg",
             "request": "launch",
             "sourceFileMap": {
                 "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
             },
-            "program": "${workspaceFolder}/bazel-bin/examples/opencv/viz3d",
+            "program": "${workspaceFolder}/bazel-bin/examples/opencv/gpu_rendering",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

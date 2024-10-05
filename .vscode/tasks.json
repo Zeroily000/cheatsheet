@@ -56,11 +56,11 @@
             }
         },
         {
-            "label": "Build examples/opencv:main",
+            "label": "Build examples/opencv:cpu_rendering",
             "type": "bazel",
             "command": "build",
             "targets": [
-                "//examples/opencv:main"
+                "//examples/opencv:cpu_rendering"
             ],
             "options": [
                 "--compilation_mode=dbg",
@@ -74,11 +74,11 @@
             }
         },
         {
-            "label": "Build examples/opencv:viz3d",
+            "label": "Build examples/opencv:gpu_rendering",
             "type": "bazel",
             "command": "build",
             "targets": [
-                "//examples/opencv:viz3d"
+                "//examples/opencv:gpu_rendering"
             ],
             "options": [
                 "--compilation_mode=dbg",

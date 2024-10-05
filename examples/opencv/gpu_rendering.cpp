@@ -14,6 +14,11 @@ static void help() {
 }
 
 }  // namespace
+
+/**
+ * The viz3d utilizes OpenGL for rendering. Data go through the OpenGL driver on the host. The
+ * window is managed by X11 while the content displayed by the window is managed by OpenGL.
+ */
 int main() {
   help();
 
