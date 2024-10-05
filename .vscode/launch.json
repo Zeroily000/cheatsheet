@@ -112,6 +112,28 @@
             ],
         },
         {
+            "name": "Debug examples/opencv:viz3d (gdb)",
+            "preLaunchTask": "Build examples/opencv:viz3d",
+            "type": "cppdbg",
+            "request": "launch",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
+            },
+            "program": "${workspaceFolder}/bazel-bin/examples/opencv/viz3d",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+        },
+        {
             "name": "Debug examples/ceres_solver:main (gdb)",
             "preLaunchTask": "Build examples/ceres_solver:main",
             "type": "cppdbg",

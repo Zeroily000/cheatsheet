@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y \
     locales \
     libcanberra-gtk3-module \
+    mesa-utils \
     x11-apps
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8

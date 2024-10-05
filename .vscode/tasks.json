@@ -74,6 +74,24 @@
             }
         },
         {
+            "label": "Build examples/opencv:viz3d",
+            "type": "bazel",
+            "command": "build",
+            "targets": [
+                "//examples/opencv:viz3d"
+            ],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--copt=-g3",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
             "label": "Build examples/ceres_solver:main",
             "type": "bazel",
             "command": "build",

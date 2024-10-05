@@ -10,3 +10,11 @@ cc_binary(
     "//data:lena",
   ],
 )
+
+cc_binary(
+  name = "viz3d",
+  srcs = ["viz3d.cpp"],
+  deps = [
+    "@opencv",
+  ],
+)
