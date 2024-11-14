@@ -7,11 +7,8 @@ module(name = "pybind-bazel-vscode")
 # https://registry.bazel.build/modules/rules_cc
 bazel_dep(name = "rules_cc", version = "0.0.10")
 
-# https://registry.bazel.build/modules/rules_python
-bazel_dep(name = "rules_python", version = "0.35.0")
-
 # https://registry.bazel.build/modules/pybind11_bazel
-bazel_dep(name = "pybind11_bazel", version = "2.12.0")
+bazel_dep(name = "pybind11_bazel", version = "2.13.6")
 
 # https://registry.bazel.build/modules/abseil-cpp
 bazel_dep(name = "abseil-cpp", version = "20240722.0")
@@ -27,6 +24,20 @@ bazel_dep(name = "boost.multi_index", version = "1.83.0")
 
 # https://registry.bazel.build/modules/ceres-solver
 bazel_dep(name = "ceres-solver", version = "2.2.0")
+
+# https://registry.bazel.build/modules/rules_python
+bazel_dep(name = "rules_python", version = "0.38.0")
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+  python_version = "3.10.12",
+)
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+  hub_name = "mypypi",
+  python_version = "3.10.12",
+  requirements_lock = "//:requirements_lock.txt",
+)
+use_repo(pip, "mypypi")
 
 # # Boost
 # # Famous C++ library that has given rise to many new additions to the C++ Standard Library
