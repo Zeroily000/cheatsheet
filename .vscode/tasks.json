@@ -109,6 +109,24 @@
                 "isDefault": false
             }
         },
+        {
+            "label": "Build examples/cuda/basic:main",
+            "type": "bazel",
+            "command": "build",
+            "targets": [
+                "//examples/cuda/basic:main"
+            ],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--copt=-g3",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
         ////////////////////////////////////////////////////
         {
             "label": "Test all",

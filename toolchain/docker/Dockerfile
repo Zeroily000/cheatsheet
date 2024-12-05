@@ -33,6 +33,13 @@ RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor >bazel-
     apt-get update && apt-get install -y \
     bazel
 
+# Install Buildifier
+RUN apt-get update && apt-get install -y \
+    wget
+RUN wget https://github.com/bazelbuild/buildtools/releases/download/v7.3.1/buildifier-linux-amd64; \
+    mv buildifier-linux-amd64 /usr/local/bin/; \
+    ln -s /usr/local/bin/buildifier-linux-amd64 /usr/local/bin/buildifier
+
 # Install OpenCV
 RUN apt-get update && apt-get install -y \
     libopencv-dev

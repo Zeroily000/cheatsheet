@@ -154,6 +154,28 @@
                     "ignoreFailures": true
                 }
             ],
+        },
+        {
+            "name": "Debug examples/cuda/basic:main (gdb)",
+            "preLaunchTask": "Build examples/cuda/basic:main",
+            "type": "cppdbg",
+            "request": "launch",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
+            },
+            "program": "${workspaceFolder}/bazel-bin/examples/cuda/basic/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
         }
     ]
 }
