@@ -1,1 +1,2 @@
+add_subdirectory(boost_multi_index_container)
 add_subdirectory(opencv)
