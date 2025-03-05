@@ -1,2 +1,2 @@
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE Boost::multi_index)
+add_executable(boost_multi_index_container main.cpp)
+target_link_libraries(boost_multi_index_container PRIVATE Boost::multi_index)
