@@ -5,6 +5,8 @@
       "includePath": [
         "/usr/include/opencv4",
         "${workspaceFolder}/**",
+        "${workspaceFolder}/bazel-bin/**",
+        "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/abseil-cpp+/**",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/boost.*~/*/include",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/ceres-solver~/config",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/ceres-solver~/include",
