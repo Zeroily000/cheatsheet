@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
+project(general)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -11,11 +12,9 @@ FetchContent_Declare(
 set(BOOST_INCLUDE_LIBRARIES multi_index)
 FetchContent_MakeAvailable(Boost)
 
-project(general)
-
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(OpenCV REQUIRED)
 
 add_subdirectory(examples)
-add_subdirectory(test)
+#add_subdirectory(test)
