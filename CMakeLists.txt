@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.30)
 project(general)
 
 include(FetchContent)
@@ -12,7 +12,10 @@ FetchContent_Declare(
 set(BOOST_INCLUDE_LIBRARIES multi_index)
 FetchContent_MakeAvailable(Boost)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_GENERATOR "Ninja")
+set(CMAKE_C_COMPILER "/usr/bin/clang-19")
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++-19")
 
 find_package(OpenCV REQUIRED)
 
