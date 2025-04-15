@@ -80,6 +80,10 @@
         "stop_token": "cpp",
         "streambuf": "cpp",
         "text_encoding": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "numeric": "cpp",
+        "hash_map": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp"
     }
 }

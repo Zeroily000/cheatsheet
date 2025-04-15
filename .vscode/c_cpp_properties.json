@@ -10,7 +10,7 @@
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/boost.*~/*/include",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/ceres-solver~/config",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/ceres-solver~/include",
-        "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/eigen~",
+        "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/eigen+",
         "${workspaceFolder}/bazel-bin/external/glog~/_virtual_includes/glog",
         "${workspaceFolder}/bazel-bin/external/gflags~/_virtual_includes/gflags"
       ],
