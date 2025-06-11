@@ -20,4 +20,5 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++-19")
 find_package(OpenCV REQUIRED)
 
 add_subdirectory(examples)
+add_subdirectory(third_party)
 #add_subdirectory(test)

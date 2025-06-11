@@ -6,9 +6,9 @@ new_local_repository(
     build_file = "//third_party:opencv.BUILD",
 )
 
-new_git_repository(
-    name = "pangolin",
-    remote = "https://github.com/stevenlovegrove/Pangolin",
-    commit = "f55cb3e5e81cb7d58511fbc3ebadcf0610cae245",
-    build_file = "//third_party:pangolin.BUILD"
-)
+# new_git_repository(
+#     name = "pangolin",
+#     remote = "https://github.com/stevenlovegrove/Pangolin",
+#     commit = "f55cb3e5e81cb7d58511fbc3ebadcf0610cae245",
+#     build_file = "//third_party:pangolin.BUILD"
+# )

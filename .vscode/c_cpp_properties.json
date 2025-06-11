@@ -12,7 +12,8 @@
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/ceres-solver~/include",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/eigen+",
         "${workspaceFolder}/bazel-bin/external/glog~/_virtual_includes/glog",
-        "${workspaceFolder}/bazel-bin/external/gflags~/_virtual_includes/gflags"
+        "${workspaceFolder}/bazel-bin/external/gflags~/_virtual_includes/gflags",
+        "${workspaceFolder}/third_party/glad/include"
       ],
       "compilerPath": "/usr/bin/gcc",
       "cStandard": "c23",

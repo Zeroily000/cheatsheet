@@ -1,3 +1,4 @@
 add_subdirectory(boost_multi_index_container)
 add_subdirectory(cxx_basics)
 add_subdirectory(opencv)
+add_subdirectory(opengl)
