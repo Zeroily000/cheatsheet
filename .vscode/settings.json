@@ -84,6 +84,14 @@
         "numeric": "cpp",
         "hash_map": "cpp",
         "fstream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "any": "cpp",
+        "cfenv": "cpp",
+        "codecvt": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "hash_set": "cpp",
+        "slist": "cpp",
+        "scoped_allocator": "cpp"
     }
 }
