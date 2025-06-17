@@ -134,6 +134,28 @@
             ],
         },
         {
+            "name": "Debug examples/opengl:main (gdb)",
+            "preLaunchTask": "Build examples/opengl:main",
+            "type": "cppdbg",
+            "request": "launch",
+            "sourceFileMap": {
+                "/proc/self/cwd": "${workspaceFolder}/bazel-${workspaceFolderBasename}"
+            },
+            "program": "${workspaceFolder}/bazel-bin/examples/opengl/main",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+        },
+        {
             "name": "Debug examples/protobuf:main (gdb)",
             "preLaunchTask": "Build examples/protobuf:main",
             "type": "cppdbg",

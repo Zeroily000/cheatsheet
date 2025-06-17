@@ -92,6 +92,24 @@
             }
         },
         {
+            "label": "Build examples/opengl:main",
+            "type": "bazel",
+            "command": "build",
+            "targets": [
+                "//examples/opengl:main"
+            ],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--copt=-g3",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
             "label": "Build examples/protobuf:main",
             "type": "bazel",
             "command": "build",

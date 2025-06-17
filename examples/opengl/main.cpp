@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "examples/opengl/shader.hpp"
+
 namespace {
 
 constexpr int kDefaultWidth{800};
@@ -44,18 +46,24 @@ char const * const kFragmentShaderSource[]{
 };
 
 // clang-format off
-constexpr float kVertices[][12]{
+constexpr float kVertices[][18]{
+  // {
+  //   -.9f, .9f, 0.f,  // top left
+  //   -.9f, 0.f, 0.f,  // bottom left
+  //    0.f, 0.f, 0.f,  // bottom right
+  //    0.f, .9f, 0.f,  // top right
+  // },
+  // {
+  //   0.f,  0.f, 0.f,  // top left
+  //   0.f, -.9f, 0.f,  // bottom left
+  //   .9f, -.9f, 0.f,  // bottom right
+  //   .9f,  0.f, 0.f,  // top right
+  // },
   {
-    -.9f, .9f, 0.f,  // top left
-    -.9f, 0.f, 0.f,  // bottom left
-     0.f, 0.f, 0.f,  // bottom right
-     0.f, .9f, 0.f,  // top right
-  },
-  {
-    0.f,  0.f, 0.f,  // top left
-    0.f, -.9f, 0.f,  // bottom left
-    .9f, -.9f, 0.f,  // bottom right
-    .9f,  0.f, 0.f,  // top right
+    // positions         // colors
+     0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top
   },
 };
 
@@ -121,62 +129,64 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  // Build and compile shader program
-  // Vertex shader
-  GLuint const vertex_shader{glCreateShader(GL_VERTEX_SHADER)};
-  glShaderSource(vertex_shader, 1, &kVertexShaderSource, nullptr);
-  glCompileShader(vertex_shader);
-  {
-    int success{false};
-    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-      char info_log[512];
-      glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
-      std::cout << "Compiling vertex shader failed: " << info_log;
-    }
-  }
+  Shader const shader{"examples/opengl/shader.vs", "examples/opengl/shader.fs"};
+  // // Build and compile shader program
+  // // Vertex shader
+  // GLuint const vertex_shader{glCreateShader(GL_VERTEX_SHADER)};
+  // glShaderSource(vertex_shader, 1, &kVertexShaderSource, nullptr);
+  // glCompileShader(vertex_shader);
+  // {
+  //   int success{false};
+  //   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+  //   if (!success) {
+  //     char info_log[512];
+  //     glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
+  //     std::cout << "Compiling vertex shader failed: " << info_log;
+  //   }
+  // }
 
-  // Fragment shader
-  constexpr std::size_t kNumShaders{
-      sizeof(kFragmentShaderSource) / sizeof(kFragmentShaderSource[0]),
-  };
-  GLuint fragment_shader[kNumShaders];
-  for (std::size_t i{0}; i < kNumShaders; ++i) {
-    fragment_shader[i] = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader[i], 1, &kFragmentShaderSource[i], nullptr);
-    glCompileShader(fragment_shader[i]);
-    int success{false};
-    glGetShaderiv(fragment_shader[i], GL_COMPILE_STATUS, &success);
-    if (!success) {
-      char info_log[512];
-      glGetShaderInfoLog(fragment_shader[i], 512, nullptr, info_log);
-      std::cout << "Compiling fragment shader failed: " << info_log;
-    }
-  }
+  // // Fragment shader
+  // constexpr std::size_t kNumShaders{
+  //     sizeof(kFragmentShaderSource) / sizeof(kFragmentShaderSource[0]),
+  // };
+  // GLuint fragment_shader[kNumShaders];
+  // for (std::size_t i{0}; i < kNumShaders; ++i) {
+  //   fragment_shader[i] = glCreateShader(GL_FRAGMENT_SHADER);
+  //   glShaderSource(fragment_shader[i], 1, &kFragmentShaderSource[i], nullptr);
+  //   glCompileShader(fragment_shader[i]);
+  //   int success{false};
+  //   glGetShaderiv(fragment_shader[i], GL_COMPILE_STATUS, &success);
+  //   if (!success) {
+  //     char info_log[512];
+  //     glGetShaderInfoLog(fragment_shader[i], 512, nullptr, info_log);
+  //     std::cout << "Compiling fragment shader failed: " << info_log;
+  //   }
+  // }
 
-  // Link shaders
-  GLuint shader_program[kNumShaders];
-  for (std::size_t i{0}; i < kNumShaders; ++i) {
-    shader_program[i] = glCreateProgram();
-    glAttachShader(shader_program[i], vertex_shader);
-    glAttachShader(shader_program[i], fragment_shader[i]);
-    glLinkProgram(shader_program[i]);
-    int success{false};
-    glGetProgramiv(shader_program[i], GL_LINK_STATUS, &success);
-    if (!success) {
-      char info_log[512];
-      glGetProgramInfoLog(shader_program[i], 512, nullptr, info_log);
-      std::cout << "Linking shaders failed: " << info_log;
-    }
-  }
+  // // Link shaders
+  // GLuint shader_program[kNumShaders];
+  // for (std::size_t i{0}; i < kNumShaders; ++i) {
+  //   shader_program[i] = glCreateProgram();
+  //   glAttachShader(shader_program[i], vertex_shader);
+  //   glAttachShader(shader_program[i], fragment_shader[i]);
+  //   glLinkProgram(shader_program[i]);
+  //   int success{false};
+  //   glGetProgramiv(shader_program[i], GL_LINK_STATUS, &success);
+  //   if (!success) {
+  //     char info_log[512];
+  //     glGetProgramInfoLog(shader_program[i], 512, nullptr, info_log);
+  //     std::cout << "Linking shaders failed: " << info_log;
+  //   }
+  // }
 
-  constexpr std::size_t kNumBuffers{sizeof(kVertices) / sizeof(kVertices[0])};
+  // constexpr std::size_t kNumBuffers{sizeof(kVertices) / sizeof(kVertices[0])};
+  constexpr std::size_t kNumBuffers{1};
   GLuint vao[kNumBuffers];
   glGenVertexArrays(kNumBuffers, vao);
   GLuint vbo[kNumBuffers];
   glGenBuffers(kNumBuffers, vbo);
-  GLuint ebo[kNumBuffers];
-  glGenBuffers(kNumBuffers, ebo);
+  // GLuint ebo[kNumBuffers];
+  // glGenBuffers(kNumBuffers, ebo);
 
   for (std::size_t i{0}; i < kNumBuffers; ++i) {
     // Bind the Vertex Array Object
@@ -187,12 +197,18 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(kVertices[i]), kVertices[i], GL_STATIC_DRAW);
 
     // Bind and set the Element Buffer Object
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices[i]), kIndices[i], GL_STATIC_DRAW);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices[i]), kIndices[i], GL_STATIC_DRAW);
 
     // Configure vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    // glEnableVertexAttribArray(0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex
     // attribute's bound vertex buffer object so afterwards we can safely unbind
@@ -205,7 +221,7 @@ int main() {
   }
 
   // Draw in wireframe polygons.
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
@@ -216,12 +232,13 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    shader.Activate();
     for (std::size_t i{0}; i < kNumBuffers; ++i) {
-      glUseProgram(shader_program[i]);
+      // glUseProgram(shader_program[i]);
       glBindVertexArray(vao[i]);  // seeing as we only have a single VAO there's no need to bind it
                                   // every time, but we'll do so to keep things a bit more organized
-      // glDrawArrays(GL_TRIANGLES, 0, 3);
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+      glDrawArrays(GL_TRIANGLES, 0, 3);
+      // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
       // glBindVertexArray(0); // no need to unbind it every time
     }
 
@@ -233,10 +250,7 @@ int main() {
   // Optional: de-allocate all resources once they've outlived their purpose:
   glDeleteVertexArrays(kNumBuffers, vao);
   glDeleteBuffers(kNumBuffers, vbo);
-  glDeleteBuffers(kNumBuffers, ebo);
-  for (std::size_t i{0}; i < kNumShaders; ++i) {
-    glDeleteProgram(shader_program[i]);
-  }
+  // glDeleteBuffers(kNumBuffers, ebo);
 
   // Terminate, clearing all previously allocated GLFW resources.
   glfwTerminate();
