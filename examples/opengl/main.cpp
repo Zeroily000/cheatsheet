@@ -102,7 +102,10 @@ void processInput(GLFWwindow * const window) {
 
 int main() {
   // Initialize and configure
-  glfwInit();
+  if (glfwInit() != GLFW_TRUE) {
+    std::cout << "Failed to initialize GLFW" << std::endl;
+    return EXIT_FAILURE;
+  }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -124,12 +127,12 @@ int main() {
   glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
   // Load all OpenGL function pointers
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0) {
     std::cout << "Failed to initialize GLAD" << std::endl;
     return EXIT_FAILURE;
   }
 
-  Shader const shader{"examples/opengl/shader.vs", "examples/opengl/shader.fs"};
+  Shader const shader{"examples/opengl/shaders/default.vs", "examples/opengl/shaders/default.fs"};
   // // Build and compile shader program
   // // Vertex shader
   // GLuint const vertex_shader{glCreateShader(GL_VERTEX_SHADER)};
@@ -224,7 +227,7 @@ int main() {
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render loop
-  while (!glfwWindowShouldClose(window)) {
+  while (glfwWindowShouldClose(window) == 0) {
     // Input
     processInput(window);
 
