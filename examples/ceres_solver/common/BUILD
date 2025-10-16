@@ -1,6 +1,16 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "pose3_manifolds",
+    srcs = ["pose3_manifolds.cpp"],
+    hdrs = ["pose3_manifolds.hpp"],
+    deps = [
+        "@ceres-solver//:ceres",
+        "@eigen",
+    ],
+)
+
+cc_library(
     name = "sized_parameter_block",
     srcs = ["sized_parameter_block.h"],
     hdrs = ["sized_parameter_block.hpp"],
@@ -14,8 +24,8 @@ cc_library(
     srcs = ["pose3.h"],
     hdrs = ["pose3.hpp"],
     deps = [
+        ":pose3_manifolds",
         ":sized_parameter_block",
-        "@ceres-solver//:ceres",
         "@eigen",
     ],
 )

@@ -20,7 +20,10 @@
       "compilerPath": "/usr/bin/gcc",
       "cStandard": "c23",
       "cppStandard": "c++23",
-      "intelliSenseMode": "linux-gcc-x64"
+      "intelliSenseMode": "linux-gcc-x64",
+      "defines": [
+        "CERES_EXPORT="
+      ]
     }
   ],
   "version": 4

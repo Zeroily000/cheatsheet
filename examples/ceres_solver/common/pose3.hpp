@@ -8,8 +8,8 @@ Pose3<T>::~Pose3() = default;
 template <typename T>
 Pose3<T>::Pose3(uint64_t id)
     : SizedParameterBlock<T, 7>(id),
-      rotation_{this->template ParameterPtr(kRotationIndex)},
-      translation_{this->template ParameterPtr(kTranslationIndex)} {}
+      rotation_{this->ParameterPtr(Pose3Manifold::kAmbientRotationIndex)},
+      translation_{this->ParameterPtr(Pose3Manifold::kAmbientTranslationIndex)} {}
 
 template <typename T>
 void Pose3<T>::SetRotation(Eigen::Quaternion<T> const & rotation) {
