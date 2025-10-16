@@ -6,18 +6,18 @@ template <typename T>
 Pose3<T>::~Pose3() = default;
 
 template <typename T>
-std::shared_ptr<Pose3<T>> Pose3<T>::Create(uint64_t id, Eigen::Quaternion<T> const & rotation,
-                                           Eigen::Matrix<T, 3, 1> const & translation) {
-  return std::shared_ptr<Pose3<T>>{new Pose3<T>{id, rotation, translation}};
+Pose3<T>::Pose3(uint64_t id)
+    : SizedParameterBlock<T, 7>(id),
+      rotation_{this->template ParameterPtr(kRotationIndex)},
+      translation_{this->template ParameterPtr(kTranslationIndex)} {}
+
+template <typename T>
+void Pose3<T>::SetRotation(Eigen::Quaternion<T> const & rotation) {
+  rotation_ = rotation;
 }
 
 template <typename T>
-Pose3<T>::Pose3(uint64_t id, Eigen::Quaternion<T> const & rotation,
-                Eigen::Matrix<T, 3, 1> const & translation)
-    : SizedParameterBlock<T, 7>(id),
-      rotation_{this->template ParameterPtr(kRotationIndex)},
-      translation_{this->template ParameterPtr(kTranslationIndex)} {
-  rotation_ = rotation;
+void Pose3<T>::SetTranslation(Eigen::Matrix<T, 3, 1> const & translation) {
   translation_ = translation;
 }
 

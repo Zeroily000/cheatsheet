@@ -3,11 +3,13 @@
 #include <gtest/gtest.h>
 
 TEST(Pose3Test, TestBasics) {
-  const uint64_t id{0};
-  const Eigen::Quaterniond rotation{Eigen::Quaterniond::Identity()};
-  const Eigen::Vector3d translation{Eigen::Vector3d::Random()};
+  uint64_t const id{0};
+  Eigen::Quaterniond const rotation{Eigen::Quaterniond::Identity()};
+  Eigen::Vector3d const translation{Eigen::Vector3d::Random()};
 
-  const std::shared_ptr<Pose3d> pose{Pose3d::Create(id, rotation, translation)};
+  auto const pose{std::make_shared<Pose3d>(id)};
+  pose->SetRotation(rotation);
+  pose->SetTranslation(translation);
 
   EXPECT_TRUE(pose->Rotation().isApprox(rotation));
   EXPECT_TRUE(pose->Translation().isApprox(translation));
