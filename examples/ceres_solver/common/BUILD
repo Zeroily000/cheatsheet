@@ -7,6 +7,7 @@ cc_library(
     deps = [
         "@ceres-solver//:ceres",
         "@eigen",
+        "@sophus",
     ],
 )
 

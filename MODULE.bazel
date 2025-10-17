@@ -37,10 +37,13 @@ bazel_dep(name = "ceres-solver", version = "2.2.0")
 bazel_dep(name = "imgui", version = "1.91.8")
 
 # https://registry.bazel.build/modules/eigen
-bazel_dep(name = "eigen", version = "3.4.0.bcr.3")
+bazel_dep(name = "eigen", version = "5.0.0")
 
 # https://registry.bazel.build/modules/glfw
 bazel_dep(name = "glfw", version = "3.3.9")
+
+# https://registry.bazel.build/modules/sophus
+bazel_dep(name = "sophus", version = "1.22.10.bcr.1")
 
 # https://registry.bazel.build/modules/rules_python
 bazel_dep(name = "rules_python", version = "1.6.1")

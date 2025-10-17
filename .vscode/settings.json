@@ -92,6 +92,7 @@
         "csignal": "cpp",
         "hash_set": "cpp",
         "slist": "cpp",
-        "scoped_allocator": "cpp"
+        "scoped_allocator": "cpp",
+        "core": "cpp"
     }
 }

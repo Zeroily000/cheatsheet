@@ -27,9 +27,9 @@ class Pose3AnalyticDiffManifold : public Pose3Manifold {
   int TangentSize() const override;
   bool Plus(double const * x, double const * delta, double * x_plus_delta) const override;
   bool PlusJacobian(double const * x, double * jacobian) const override;
-  bool RightMultiplyByPlusJacobian(double const * x, int const num_rows,
-                                   double const * ambient_matrix,
-                                   double * tangent_matrix) const override;
+  // bool RightMultiplyByPlusJacobian(double const * x, int const num_rows,
+  //                                  double const * ambient_matrix,
+  //                                  double * tangent_matrix) const override;
   bool Minus(double const * y, double const * x, double * y_minus_x) const override;
   bool MinusJacobian(double const * x, double * jacobian) const override;
 };
