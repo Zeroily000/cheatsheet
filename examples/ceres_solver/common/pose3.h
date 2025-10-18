@@ -7,9 +7,11 @@
 
 template <typename T>
 class Pose3 : public SizedParameterBlock<T, Pose3Manifold::kAmbientSize> {
+// class Pose3 : public std::array<T, Pose3Manifold::kAmbientSize> {
  public:
-  Pose3(uint64_t id);
-  ~Pose3() override;
+  // Pose3(uint64_t id);
+  Pose3();
+  ~Pose3();
 
   Pose3(Pose3 const &) = delete;
   Pose3(Pose3 &&) noexcept = delete;

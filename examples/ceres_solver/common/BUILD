@@ -1,5 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "pose3_manifolds",
     srcs = ["pose3_manifolds.cpp"],
@@ -30,6 +32,18 @@ cc_library(
         "@eigen",
     ],
 )
+
+cc_library(
+    name = "rotation_manifold",
+    srcs = ["rotation_manifold.cpp"],
+    hdrs = ["rotation_manifold.hpp"],
+    deps = [
+        "@ceres-solver//:ceres",
+        "@eigen",
+        "@sophus",
+    ],
+)
+
 
 cc_test(
     name = "pose3_test",

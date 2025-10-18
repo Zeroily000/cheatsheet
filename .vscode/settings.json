@@ -93,6 +93,10 @@
         "hash_set": "cpp",
         "slist": "cpp",
         "scoped_allocator": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "regex": "cpp",
+        "source_location": "cpp",
+        "shared_mutex": "cpp",
+        "*.inc": "cpp"
     }
 }
