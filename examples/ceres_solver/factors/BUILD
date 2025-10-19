@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,9 +7,19 @@ cc_library(
     srcs = ["between_factor.cpp"],
     hdrs = ["between_factor.hpp"],
     deps = [
-        # "//examples/ceres_solver/common:pose3_manifolds",
         "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
     ],
 )
+
+cc_test(
+    name = "between_factor_test",
+    srcs = ["between_factor_test.cpp"],
+    deps = [
+        ":between_factor",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
