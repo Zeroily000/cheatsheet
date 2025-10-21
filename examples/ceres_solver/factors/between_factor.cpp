@@ -3,9 +3,9 @@
 #include <sophus/so3.hpp>
 #include <utility>
 
-BetweenFactor::BetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b_,
+BetweenFactor::BetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b,
                              Eigen::Matrix<double, kResidualSize, kResidualSize> sqrt_info)
-    : a_R_b_{std::move(a_R_b)}, a_t_b_{std::move(a_t_b_)}, sqrt_info_{std::move(sqrt_info)} {}
+    : a_R_b_{std::move(a_R_b)}, a_t_b_{std::move(a_t_b)}, sqrt_info_{std::move(sqrt_info)} {}
 
 BetweenFactor::~BetweenFactor() = default;
 
@@ -48,10 +48,10 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
       /**
        * d/dw e_w = lim_{w->0} (Log(r_R_b^{-1} ∙ r_R_a ∙ Exp(w) ∙ a_R_b) - e_w) / w
        *          = lim_{w->0} (Log(r_R_b^{-1} ∙ r_R_a ∙ Exp(w) ∙ a_R_b) - e_w) / w
-       *          = lim_{w->0} (Log(r_R_b^{-1} ∙ r_R_a ∙ a_R_b ∙ Exp(r_R_b^{-1} ∙ w)) - e_w) / w
-       *          = lim_{w->0} (Log(e_R ∙ Exp(r_R_b^{-1} ∙ w)) - e_w) / w
-       *          = lim_{w->0} (Log(Exp(e_w + Jr^{-1}(e_w) ∙ (r_R_b^{-1} ∙ w)) - e_w) / w
-       *          = Jr^{-1}(e_w) ∙ r_R_b^{-1}
+       *          = lim_{w->0} (Log(r_R_b^{-1} ∙ r_R_a ∙ a_R_b ∙ Exp(a_R_b^{-1} ∙ w)) - e_w) / w
+       *          = lim_{w->0} (Log(e_R ∙ Exp(a_R_b^{-1} ∙ w)) - e_w) / w
+       *          = lim_{w->0} (Log(Exp(e_w + Jr^{-1}(e_w) ∙ (a_R_b^{-1} ∙ w)) - e_w) / w
+       *          = Jr^{-1}(e_w) ∙ a_R_b^{-1}
        *
        * d/dw e_t = lim_{w->0} (r_R_b^{-1} ∙ r_R_a ∙ Exp(w) ∙ a_t_b - e_t) / w
        *          = lim_{w->0} (r_R_b^{-1} ∙ r_R_a ∙ (I + [w]x) ∙ a_t_b - e_t) / w
@@ -62,7 +62,7 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
       // clang-format on
       Eigen::Map<Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor>> dr_dw{jacobians[0]};
       dr_dw.setZero();
-      dr_dw.block<3, 3>(0, 0) = Sophus::SO3d::leftJacobianInverse(error.head<3>()) * b_R_ref;
+      dr_dw.block<3, 3>(0, 0) = Sophus::SO3d::leftJacobianInverse(error.head<3>()) * a_R_b_.inverse().toRotationMatrix();
       dr_dw.block<3, 3>(3, 0) = b_R_ref * ref_R_a * Sophus::SO3d::hat(-a_t_b_);
     }
     if (jacobians[1] != nullptr) {

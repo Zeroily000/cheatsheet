@@ -12,7 +12,7 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
 
   static std::size_t constexpr kResidualSize{kResidualRotationSize + kResidualTranslationSize};
 
-  BetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b_,
+  BetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b,
                 Eigen::Matrix<double, kResidualSize, kResidualSize> sqrt_info);
   ~BetweenFactor() override;
 

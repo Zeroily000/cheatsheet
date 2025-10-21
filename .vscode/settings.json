@@ -97,6 +97,7 @@
         "regex": "cpp",
         "source_location": "cpp",
         "shared_mutex": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "alignedvector3": "cpp"
     }
 }
