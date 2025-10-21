@@ -60,10 +60,14 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
        *          = -r_R_b^{-1} ∙ r_R_a ∙ [a_t_b]x
        */
       // clang-format on
-      Eigen::Map<Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor>> dr_dw{jacobians[0]};
-      dr_dw.setZero();
-      dr_dw.block<3, 3>(0, 0) = Sophus::SO3d::leftJacobianInverse(error.head<3>()) * a_R_b_.inverse().toRotationMatrix();
-      dr_dw.block<3, 3>(3, 0) = b_R_ref * ref_R_a * Sophus::SO3d::hat(-a_t_b_);
+
+      Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor> de_dwa;
+      de_dwa.setZero();
+      de_dwa.block<3, 3>(0, 0) = Sophus::SO3d::leftJacobianInverse(error.head<3>()) * a_R_b_.inverse().toRotationMatrix();
+      de_dwa.block<3, 3>(3, 0) = b_R_ref * ref_R_a * Sophus::SO3d::hat(-a_t_b_);
+
+      Eigen::Map<Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
+      dr_dwa = sqrt_info_ * de_dwa;
     }
     if (jacobians[1] != nullptr) {
       // clang-format off
@@ -73,9 +77,12 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
        * d/dt e_t = r_R_b^{-1}
        */
       // clang-format on
-      Eigen::Map<Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor>> dr_dt{jacobians[1]};
-      dr_dt.setZero();
-      dr_dt.block<3, 3>(3, 0) = b_R_ref.toRotationMatrix();
+      Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor> de_dta;
+      de_dta.setZero();
+      de_dta.block<3, 3>(3, 0) = b_R_ref.toRotationMatrix();
+
+      Eigen::Map<Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
+      dr_dta = sqrt_info_ * de_dta;
     }
     if (jacobians[2] != nullptr) {
       // clang-format off
@@ -93,10 +100,13 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
        *          = [e_t]x
        */
       // clang-format on
-      Eigen::Map<Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor>> dr_dw{jacobians[2]};
-      dr_dw.setZero();
-      dr_dw.block<3, 3>(0, 0) = -Sophus::SO3d::leftJacobianInverse(error.head<3>());
-      dr_dw.block<3, 3>(3, 0) = Sophus::SO3d::hat(error.tail<3>());
+      Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor> de_dwb;
+      de_dwb.setZero();
+      de_dwb.block<3, 3>(0, 0) = -Sophus::SO3d::leftJacobianInverse(error.head<3>());
+      de_dwb.block<3, 3>(3, 0) = Sophus::SO3d::hat(error.tail<3>());
+
+      Eigen::Map<Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
+      dr_dwb = sqrt_info_ * de_dwb;
     }
     if (jacobians[3] != nullptr) {
       // clang-format off
@@ -106,9 +116,12 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
        * d/dt e_t = -r_R_b^{-1}
        */
       // clang-format on
-      Eigen::Map<Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor>> dr_dt{jacobians[3]};
-      dr_dt.setZero();
-      dr_dt.block<3, 3>(3, 0) = -b_R_ref.toRotationMatrix();
+      Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor> de_dtb;
+      de_dtb.setZero();
+      de_dtb.block<3, 3>(3, 0) = -b_R_ref.toRotationMatrix();
+
+      Eigen::Map<Eigen::Matrix<double, kResidualSize, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
+      dr_dtb = sqrt_info_ * de_dtb;
     }
   }
 

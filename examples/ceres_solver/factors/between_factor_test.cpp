@@ -81,8 +81,8 @@ TEST(tmp, tmp) {
   BetweenFactor const factor{qz, tz, sqrt_info};
 
   factor.Evaluate(parameters.data(), residuals.data(), jacobians.data());
-  // std::cout << dr_dwa_analytic << std::endl;
-  // std::cout << std::endl;
+  std::cout << dr_dwa_analytic << std::endl;
+  std::cout << std::endl;
   // std::cout << dr_dta_analytic << std::endl;
   // std::cout << std::endl;
   // std::cout << dr_dwb_analytic << std::endl;
@@ -143,25 +143,24 @@ TEST(tmp, tmp) {
   EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, 1e-5));
   // std::cout << dr_dtb_numeric << std::endl;
 
+  // Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa_autodiff;
+  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dta_autodiff;
+  // Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqb_autodiff;
+  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_autodiff;
+  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
+  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
+  // jacobians = {dr_dqa_autodiff.data(), dr_dta_autodiff.data(), dr_dqb_autodiff.data(),
+  //              dr_dtb_autodiff.data()};
+
   // auto const * manifold{new ceres::EigenQuaternionManifold};
   // auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
-  // autodiff_factor->Evaluate(parameters, residuals, jacobians);
-  // Eigen::Map<Eigen::Matrix<double, 6, 4, Eigen::RowMajor> const> const dr_dqa{jacobians[0]};
-  // Eigen::Map<Eigen::Matrix<double, 6, 4, Eigen::RowMajor> const> const dr_dqb{jacobians[2]};
-  // // std::cout << dr_dqa << std::endl;
-  // Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dq_dw;
-  // manifold->PlusJacobian(r_R_a.coeffs().data(), dq_dw.data());
-  // std::cout << dr_dqa * dq_dw * .5 << std::endl;
-  // std::cout << std::endl;
-  // // std::cout << dr_dta << std::endl;
-  // std::cout << dr_dqb * dq_dw * .5 << std::endl;
+  // autodiff_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
+
+  // Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqa_dwa;
+  // manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
+  // std::cout << dr_dqa_autodiff * dqa_dwa * .5 << std::endl;
   // std::cout << std::endl;
 
-  // // delete[] jacobians;
-  // // delete[] data2;
-  // // delete[] residuals;
-  // // delete[] parameters;
-  // // delete[] data1;
   // delete manifold;
   // delete autodiff_factor;
 }
