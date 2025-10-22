@@ -38,12 +38,17 @@ cc_library(
     srcs = ["rotation_manifold.cpp"],
     hdrs = ["rotation_manifold.hpp"],
     deps = [
+        ":types",
         "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
     ],
 )
 
+cc_library(
+    name = "types",
+    hdrs = ["types.hpp"],
+)
 
 cc_test(
     name = "pose3_test",

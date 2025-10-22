@@ -1,8 +1,9 @@
 #include "examples/ceres_solver/common/rotation_manifold.hpp"
 
 #include <sophus/so3.hpp>
+#include <utility>
 
-RotationManifold::RotationManifold() = default;
+RotationManifold::RotationManifold(Mode mode) : mode_{std::move(mode)} {}
 
 RotationManifold::~RotationManifold() = default;
 
@@ -15,10 +16,16 @@ bool RotationManifold::Plus(double const * const x, double const * const delta,
   Eigen::Map<Eigen::Quaterniond const> const q0{x};
   Eigen::Map<Eigen::Vector3d const> const dw{delta};
   Eigen::Map<Eigen::Quaterniond> q1{x_plus_delta};
-
-  q1 = q0 * Sophus::SO3d::exp(dw).unit_quaternion();
-
-  return true;
+  Eigen::Quaterniond const dq{Sophus::SO3d::exp(dw).unit_quaternion()};
+  if (mode_ == Mode::kRightPerturbation) {
+    q1 = q0 * dq;
+    return true;
+  }
+  if (mode_ == Mode::kLeftPerturbation) {
+    q1 = dq * q0;
+    return true;
+  }
+  return false;
 }
 
 bool RotationManifold::PlusJacobian(double const * const /* x */, double * const jacobian) const {
@@ -40,6 +47,6 @@ bool RotationManifold::Minus(double const * const y, double const * const x,
   return true;
 }
 
-bool RotationManifold::MinusJacobian(double const * x, double * jacobian) const {
-  return false;
-}
+bool RotationManifold::MinusJacobian(double const * x, double * jacobian) const { return false; }
+
+RotationManifold::Mode const & RotationManifold::GetMode() const { return mode_; }

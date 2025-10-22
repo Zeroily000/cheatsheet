@@ -5,6 +5,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "examples/ceres_solver/common/rotation_manifold.hpp"
+
 class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
  public:
   static std::size_t constexpr kResidualRotationSize{3};
@@ -12,7 +14,8 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
 
   static std::size_t constexpr kResidualSize{kResidualRotationSize + kResidualTranslationSize};
 
-  BetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b,
+  BetweenFactor(RotationManifold const * rotation_manifold, Eigen::Quaterniond a_q_b,
+                Eigen::Vector3d a_t_b,
                 Eigen::Matrix<double, kResidualSize, kResidualSize> sqrt_info);
   ~BetweenFactor() override;
 
@@ -20,7 +23,10 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
                 double ** jacobians) const override;
 
  private:
-  Eigen::Quaterniond a_R_b_;
+  bool RightOplusResidual(double const * const * parameters, double * residuals,
+                          double ** jacobians) const;
+  RotationManifold const * const rotation_manifold_;
+  Eigen::Quaterniond a_q_b_;
   Eigen::Vector3d a_t_b_;
   Eigen::Matrix<double, kResidualSize, kResidualSize> sqrt_info_;
 };

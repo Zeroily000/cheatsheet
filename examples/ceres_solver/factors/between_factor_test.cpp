@@ -58,7 +58,8 @@ Eigen::Matrix<double, 6, 1> ComputeResiduals(
 
 }  // namespace
 
-TEST(tmp, tmp) {
+TEST(RotationManifoldTest, TestRightPerturbation) {
+  RotationManifold rotation_manifold;
   Eigen::Quaterniond const qa{Eigen::Quaterniond::UnitRandom()};
   Eigen::Vector3d const ta{Eigen::Vector3d::Random()};
   Eigen::Quaterniond const qb{Eigen::Quaterniond::UnitRandom()};
@@ -78,17 +79,11 @@ TEST(tmp, tmp) {
   Eigen::Quaterniond const qz{qa.inverse() * qb};
   Eigen::Vector3d const tz{qa.inverse() * (tb - ta)};
   Eigen::Matrix<double, 6, 6> sqrt_info{Eigen::Matrix<double, 6, 6>::Identity()};
-  BetweenFactor const factor{qz, tz, sqrt_info};
+  BetweenFactor const factor{&rotation_manifold, qz, tz, sqrt_info};
 
   factor.Evaluate(parameters.data(), residuals.data(), jacobians.data());
   std::cout << dr_dwa_analytic << std::endl;
   std::cout << std::endl;
-  // std::cout << dr_dta_analytic << std::endl;
-  // std::cout << std::endl;
-  // std::cout << dr_dwb_analytic << std::endl;
-  // std::cout << std::endl;
-  // std::cout << dr_dtb_analytic << std::endl;
-  // std::cout << std::endl;
 
   Eigen::Vector3d const dw{Eigen::Vector3d::Random().normalized() * 1e-9};
   Eigen::Quaterniond const dqx{
@@ -105,7 +100,6 @@ TEST(tmp, tmp) {
       (ComputeResiduals(qa * dqy, ta, qb, tb, qz, tz, sqrt_info) - residuals) / dw.y();
   dr_dwa_numeric.col(2) =
       (ComputeResiduals(qa * dqz, ta, qb, tb, qz, tz, sqrt_info) - residuals) / dw.z();
-  // std::cout << dr_dwa_numeric << std::endl;
   EXPECT_TRUE(dr_dwa_analytic.isApprox(dr_dwa_numeric, 1e-5));
 
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dwb_numeric;
@@ -116,7 +110,6 @@ TEST(tmp, tmp) {
       (ComputeResiduals(qa, ta, qb * dqy, tb, qz, tz, sqrt_info) - residuals) / dw.y();
   dr_dwb_numeric.col(2) =
       (ComputeResiduals(qa, ta, qb * dqz, tb, qz, tz, sqrt_info) - residuals) / dw.z();
-  // std::cout << dr_dwb_numeric << std::endl;
   EXPECT_TRUE(dr_dwb_analytic.isApprox(dr_dwb_numeric, 1e-5));
 
   Eigen::Vector3d const dt{Eigen::Vector3d::Random().normalized() * 1e-9};
@@ -131,7 +124,6 @@ TEST(tmp, tmp) {
   dr_dta_numeric.col(2) =
       (ComputeResiduals(qa, ta + dtz, qb, tb, qz, tz, sqrt_info) - residuals) / dt.z();
   EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_numeric, 1e-5));
-  // std::cout << dr_dta_numeric << std::endl;
 
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_numeric;
   dr_dtb_numeric.col(0) =
@@ -143,24 +135,24 @@ TEST(tmp, tmp) {
   EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, 1e-5));
   // std::cout << dr_dtb_numeric << std::endl;
 
-  // Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa_autodiff;
-  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dta_autodiff;
-  // Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqb_autodiff;
-  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_autodiff;
-  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
-  // Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
-  // jacobians = {dr_dqa_autodiff.data(), dr_dta_autodiff.data(), dr_dqb_autodiff.data(),
-  //              dr_dtb_autodiff.data()};
+  //   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa_autodiff;
+  //   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dta_autodiff;
+  //   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqb_autodiff;
+  //   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_autodiff;
+  //   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
+  //   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
+  //   jacobians = {dr_dqa_autodiff.data(), dr_dta_autodiff.data(), dr_dqb_autodiff.data(),
+  //                dr_dtb_autodiff.data()};
 
-  // auto const * manifold{new ceres::EigenQuaternionManifold};
-  // auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
-  // autodiff_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
+  //   auto const * manifold{new ceres::EigenQuaternionManifold};
+  //   auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
+  //   autodiff_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
 
-  // Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqa_dwa;
-  // manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
-  // std::cout << dr_dqa_autodiff * dqa_dwa * .5 << std::endl;
-  // std::cout << std::endl;
+  //   Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqa_dwa;
+  //   manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
+  //   std::cout << dr_dqa_autodiff * dqa_dwa * .5 << std::endl;
+  //   std::cout << std::endl;
 
-  // delete manifold;
-  // delete autodiff_factor;
+  //   delete manifold;
+  //   delete autodiff_factor;
 }
