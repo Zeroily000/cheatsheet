@@ -25,6 +25,10 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
  private:
   bool RightOplusResidual(double const * const * parameters, double * residuals,
                           double ** jacobians) const;
+
+  bool LeftOplusResidual(double const * const * parameters, double * residuals,
+                         double ** jacobians) const;
+
   RotationManifold const * const rotation_manifold_;
   Eigen::Quaterniond a_q_b_;
   Eigen::Vector3d a_t_b_;
