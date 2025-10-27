@@ -4,6 +4,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <sophus/so3.hpp>
 
 #include "examples/ceres_solver/common/rotation_manifold.hpp"
 
@@ -23,11 +24,11 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
                 double ** jacobians) const override;
 
  private:
-  bool RightOplusResidual(double const * const * parameters, double * residuals,
-                          double ** jacobians) const;
+  template <typename T>
+  bool EvaluateRightOplus(T const * const * parameters, T * residuals, T ** jacobians) const;
 
-  bool LeftOplusResidual(double const * const * parameters, double * residuals,
-                         double ** jacobians) const;
+  template <typename T>
+  bool EvaluateLeftOplus(T const * const * parameters, T * residuals, T ** jacobians) const;
 
   RotationManifold const * const rotation_manifold_;
 
