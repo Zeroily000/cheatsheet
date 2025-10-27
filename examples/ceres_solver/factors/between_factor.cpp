@@ -18,6 +18,9 @@ bool BetweenFactor::Evaluate(double const * const * const parameters, double * c
   if (rotation_manifold_->GetMode() == RotationManifold::Mode::kRightPerturbation) {
     return RightOplusResidual(parameters, residuals, jacobians);
   }
+  if (rotation_manifold_->GetMode() == RotationManifold::Mode::kLeftPerturbation) {
+    return LeftOplusResidual(parameters, residuals, jacobians);
+  }
 
   return false;
 }
@@ -191,7 +194,7 @@ bool BetweenFactor::LeftOplusResidual(double const * const * const parameters,
        */
       // clang-format on
 
-      Eigen::Matrix<double, kResidualSize, 4, Eigen::RowMajor> de_dwa;
+      Eigen::Matrix<double, kResidualSize, 4> de_dwa;
       de_dwa.setZero();
       de_dwa.block<3, 3>(0, 0) =
           Sophus::SO3d::leftJacobianInverse(-error.head<3>()) * a_q_r.toRotationMatrix();
