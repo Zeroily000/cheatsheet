@@ -7,8 +7,21 @@ cc_library(
     srcs = ["between_factor.cpp"],
     hdrs = ["between_factor.hpp"],
     deps = [
+        ":utils",
         "//examples/ceres_solver/common:rotation_manifold",
         "@ceres-solver//:ceres",
+        "@eigen",
+        "@sophus",
+    ],
+)
+
+cc_library(
+    name = "utils",
+    srcs = ["utils.h"],
+    hdrs = ["utils.hpp"],
+    deps = [
+        # "//examples/ceres_solver/common:rotation_manifold",
+        # "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
     ],
