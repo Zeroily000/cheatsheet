@@ -1,6 +1,11 @@
 #include "Eigen/Core"
 #include "Eigen/Geometry"
 
+enum class RotationUpdateMode {
+  kRight,
+  kLeft,
+};
+
 /**
  * @brief This function computes the residual between two poses and the Jacobian w.r.t the rotation
  * and translation vector. The rotation uses the right update mode, i.e., q' = q * Exp(dw).

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "examples/ceres_solver/factors/utils.h"
 
 template <typename T>

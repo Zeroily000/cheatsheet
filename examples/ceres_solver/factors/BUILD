@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "between_factor",
-    srcs = ["between_factor.cpp"],
+    srcs = ["between_factor.h"],
     hdrs = ["between_factor.hpp"],
     deps = [
         ":utils",
