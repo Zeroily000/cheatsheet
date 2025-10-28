@@ -32,26 +32,32 @@ struct AutoDiffBetweenFactor {
     // Eigen::Map<Eigen::Matrix<T, 6, 1>> res{residuals};
     // res = sqrt_info_.cast<T>() * error;
 
-    Eigen::Map<Eigen::Quaternion<T> const> const r_q_a{qa};
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_t_ra{ta};
+    // Eigen::Map<Eigen::Quaternion<T> const> const r_q_a{qa};
+    // Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_t_ra{ta};
 
-    Eigen::Map<Eigen::Quaternion<T> const> const r_q_b{qb};
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_t_rb{tb};
+    // Eigen::Map<Eigen::Quaternion<T> const> const r_q_b{qb};
+    // Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_t_rb{tb};
 
-    Eigen::Quaternion<T> const b_q_r{r_q_b.inverse()};
-    Eigen::Quaternion<T> const a_q_r{r_q_a.inverse()};
-    Eigen::Matrix<T, 6, 1> error;
-    error.template head<3>() = Sophus::SO3<T>{a_q_b_.cast<T>() * b_q_r * r_q_a}.log();
-    error.template tail<3>() = a_q_b_.cast<T>() * b_q_r * (r_t_ra - r_t_rb) + a_t_ab_.cast<T>();
+    // Eigen::Quaternion<T> const b_q_r{r_q_b.inverse()};
+    // Eigen::Quaternion<T> const a_q_r{r_q_a.inverse()};
+    // Eigen::Matrix<T, 6, 1> error;
+    // error.template head<3>() = Sophus::SO3<T>{a_q_b_.cast<T>() * b_q_r * r_q_a}.log();
+    // error.template tail<3>() = a_q_b_.cast<T>() * b_q_r * (r_t_ra - r_t_rb) + a_t_ab_.cast<T>();
 
-    Eigen::Map<Eigen::Matrix<T, 6, 1>> res{residuals};
-    res = sqrt_info_.cast<T>() * error;
+    // Eigen::Map<Eigen::Matrix<T, 6, 1>> res{residuals};
+    // res = sqrt_info_.cast<T>() * error;
 
-    return true;
+    // return true;
 
     // std::array<T const*, 4> const parameters{qa, ta, qb, tb};
     // return factor_->Evaluate(parameters.data(), residuals, nullptr);
-
+    Eigen::Map<Eigen::Quaternion<T> const> const r_qe_a{qa};
+    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_ra{ta};
+    Eigen::Map<Eigen::Quaternion<T> const> const r_qe_b{qb};
+    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_rb{tb};
+    Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
+    T ** jacobians{nullptr};
+    return factor_->Evaluate(r_qe_a, r_te_ra, r_qe_b, r_te_rb, whitened_error, jacobians);
   }
 
   static ceres::CostFunction * Create(Eigen::Quaterniond const & a_R_b,
