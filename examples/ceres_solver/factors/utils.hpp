@@ -1,135 +1,134 @@
 #include "examples/ceres_solver/factors/utils.h"
 
 template <typename T>
-bool EvaluateRightOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
-                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
-                        Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
-                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
-                        Eigen::Quaternion<T> const & a_qm_b, Eigen::Matrix<T, 3, 1> const & a_tm_ab,
+bool EvaluateRightOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_i,
+                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ri,
+                        Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_j,
+                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rj,
+                        Eigen::Quaternion<T> const & i_qm_j, Eigen::Matrix<T, 3, 1> const & i_tm_ij,
                         Eigen::Matrix<T, 6, 6> sqrt_info,
                         Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) {
   Eigen::Matrix<T, 6, 1> error;
-  Eigen::Quaternion<T> const b_qe_r{r_qe_b.inverse()};
-  Eigen::Quaternion<T> const b_qe_a{b_qe_r * r_qe_a};
-  error.template head<3>() = Sophus::SO3<T>{b_qe_a * a_qm_b}.log();
-  error.template tail<3>() = b_qe_a * a_tm_ab + b_qe_r * (r_te_ra - r_te_rb);
+  Eigen::Quaternion<T> const j_qe_r{r_qe_j.inverse()};
+  Eigen::Quaternion<T> const j_qe_i{j_qe_r * r_qe_i};
+  error.template head<3>() = Sophus::SO3<T>{j_qe_i * i_qm_j}.log();
+  error.template tail<3>() = j_qe_i * i_tm_ij + j_qe_r * (r_te_ri - r_te_rj);
   whitened_error = sqrt_info * error;
 
   if (jacobians != nullptr) {
     if (jacobians[0] != nullptr) {
-      Eigen::Matrix<T, 6, 4> de_dwa;
-      de_dwa.setZero();
-      // d/dwa e_w = Jr^{-1}(e_w)·a_R_b^{-1}
-      de_dwa.template block<3, 3>(0, 0) =
+      Eigen::Matrix<T, 6, 4> de_dwi;
+      de_dwi.setZero();
+      // d/dwi e_w = Jr^{-1}(e_w)·i_R_j^{-1}
+      de_dwi.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(error.template head<3>()) *
-          a_qm_b.inverse().toRotationMatrix();
-      // d/dwa e_t = -r_R_b^{-1}·r_R_a·[a_t_ab]x
-      de_dwa.template block<3, 3>(3, 0) = b_qe_a * Sophus::SO3<T>::hat(-a_tm_ab);
+          i_qm_j.inverse().toRotationMatrix();
+      // d/dwi e_t = -r_R_j^{-1}·r_R_i·[i_t_ij]x
+      de_dwi.template block<3, 3>(3, 0) = j_qe_i * Sophus::SO3<T>::hat(-i_tm_ij);
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
-      dr_dwa = sqrt_info * de_dwa;
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwi{jacobians[0]};
+      dr_dwi = sqrt_info * de_dwi;
     }
     if (jacobians[1] != nullptr) {
-      Eigen::Matrix<T, 6, 3> de_dta;
-      // d/dta e_w = 0
-      de_dta.setZero();
-      // d/dta e_t = r_R_b^{-1}
-      de_dta.template block<3, 3>(3, 0) = b_qe_r.toRotationMatrix();
+      Eigen::Matrix<T, 6, 3> de_dti;
+      // d/dti e_w = 0
+      de_dti.setZero();
+      // d/dti e_t = r_R_j^{-1}
+      de_dti.template block<3, 3>(3, 0) = j_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
-      dr_dta = sqrt_info * de_dta;
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dti{jacobians[1]};
+      dr_dti = sqrt_info * de_dti;
     }
     if (jacobians[2] != nullptr) {
-      Eigen::Matrix<T, 6, 4> de_dwb;
-      de_dwb.setZero();
-      // d/dwb e_w = -Jl^{-1}(e_w)
-      de_dwb.template block<3, 3>(0, 0) =
+      Eigen::Matrix<T, 6, 4> de_dwj;
+      de_dwj.setZero();
+      // d/dwj e_w = -Jl^{-1}(e_w)
+      de_dwj.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>());
-      // d/dwb e_t = [e_t]x
-      de_dwb.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
+      // d/dwj e_t = [e_t]x
+      de_dwj.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
-      dr_dwb = sqrt_info * de_dwb;
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwj{jacobians[2]};
+      dr_dwj = sqrt_info * de_dwj;
     }
     if (jacobians[3] != nullptr) {
-      Eigen::Matrix<T, 6, 3> de_dtb;
-      // d/dtb e_w = 0
-      de_dtb.setZero();
-      // d/dtb e_t = -r_R_b^{-1}
-      de_dtb.template block<3, 3>(3, 0) = -b_qe_r.toRotationMatrix();
+      Eigen::Matrix<T, 6, 3> de_dtj;
+      // d/dtj e_w = 0
+      de_dtj.setZero();
+      // d/dtj e_t = -r_R_j^{-1}
+      de_dtj.template block<3, 3>(3, 0) = -j_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
-      dr_dtb = sqrt_info * de_dtb;
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtj{jacobians[3]};
+      dr_dtj = sqrt_info * de_dtj;
     }
   }
   return true;
 }
 
 template <typename T>
-static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
-                              Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
-                              Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
-                              Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
-                              Eigen::Quaternion<T> const & a_qm_b,
-                              Eigen::Matrix<T, 3, 1> const & a_tm_ab,
-                              Eigen::Matrix<T, 6, 6> sqrt_info,
-                              Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) {
-  Eigen::Quaternion<T> const b_qe_r{r_qe_b.inverse()};
-  Eigen::Quaternion<T> const a_qe_r{r_qe_a.inverse()};
+bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_i,
+                       Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ri,
+                       Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_j,
+                       Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rj,
+                       Eigen::Quaternion<T> const & i_qm_j, Eigen::Matrix<T, 3, 1> const & i_tm_ij,
+                       Eigen::Matrix<T, 6, 6> sqrt_info,
+                       Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) {
+  Eigen::Quaternion<T> const j_qe_r{r_qe_j.inverse()};
+  Eigen::Quaternion<T> const i_qe_r{r_qe_i.inverse()};
   Eigen::Matrix<T, 6, 1> error;
-  // e_w = Log(a_R_b·r_R_b^{-1}·r_R_a)
-  error.template head<3>() = Sophus::SO3<T>{a_qm_b * b_qe_r * r_qe_a}.log();
-  // e_t = a_R_b·r_R_b^{-1}·(r_t_ra - r_t_rb) + a_t_ab
-  error.template tail<3>() = a_qm_b * b_qe_r * (r_te_ra - r_te_rb) + a_tm_ab;
+  // e_w = Log(i_R_j·r_R_j^{-1}·r_R_i)
+  error.template head<3>() = Sophus::SO3<T>{i_qm_j * j_qe_r * r_qe_i}.log();
+  // e_t = i_R_j·r_R_j^{-1}·(r_t_ri - r_t_rj) + i_t_ij
+  error.template tail<3>() = i_qm_j * j_qe_r * (r_te_ri - r_te_rj) + i_tm_ij;
 
   whitened_error = sqrt_info * error;
 
   if (jacobians != nullptr) {
     if (jacobians[0] != nullptr) {
-      Eigen::Matrix<T, 6, 4> de_dwa;
-      // d/dw e_t = 0
-      de_dwa.setZero();
-      // d/dwa e_w = Jr^{-1}(e_w)·r_R_a^{-1}
-      de_dwa.template block<3, 3>(0, 0) =
+      Eigen::Matrix<T, 6, 4> de_dwi;
+      // d/dwi e_t = 0
+      de_dwi.setZero();
+      // d/dwi e_w = Jr^{-1}(e_w)·r_R_i^{-1}
+      de_dwi.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
-          a_qe_r.toRotationMatrix();
+          i_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
-      dr_dwa = sqrt_info * de_dwa;
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwi{jacobians[0]};
+      dr_dwi = sqrt_info * de_dwi;
     }
     if (jacobians[1] != nullptr) {
-      Eigen::Matrix<T, 6, 3> de_dta;
-      // d/dta e_w = 0
-      de_dta.setZero();
-      // d/dta e_t = a_R_b·r_R_b^{-1}
-      de_dta.template block<3, 3>(3, 0) = (a_qm_b * r_qe_b.inverse()).toRotationMatrix();
+      Eigen::Matrix<T, 6, 3> de_dti;
+      // d/dti e_w = 0
+      de_dti.setZero();
+      // d/dti e_t = i_R_j·r_R_j^{-1}
+      de_dti.template block<3, 3>(3, 0) = (i_qm_j * r_qe_j.inverse()).toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
-      dr_dta = sqrt_info * de_dta;
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dti{jacobians[1]};
+      dr_dti = sqrt_info * de_dti;
     }
     if (jacobians[2] != nullptr) {
-      Eigen::Matrix<T, 6, 4> de_dwb;
-      de_dwb.setZero();
-      // d/dwb e_w = -Jr^{-1}(e_w)·r_R_a^{-1}
-      de_dwb.template block<3, 3>(0, 0) =
+      Eigen::Matrix<T, 6, 4> de_dwj;
+      de_dwj.setZero();
+      // d/dwj e_w = -Jr^{-1}(e_w)·r_R_i^{-1}
+      de_dwj.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
-          a_qe_r.toRotationMatrix();
-      // d/dwb e_t = a_R_b·r_R_b^{-1}·[r_t_ra - r_t_rb]x
-      de_dwb.template block<3, 3>(3, 0) =
-          (a_qm_b * r_qe_b.inverse()).toRotationMatrix() * Sophus::SO3<T>::hat(r_te_ra - r_te_rb);
+          i_qe_r.toRotationMatrix();
+      // d/dwj e_t = i_R_j·r_R_j^{-1}·[r_t_ri - r_t_rj]x
+      de_dwj.template block<3, 3>(3, 0) =
+          (i_qm_j * r_qe_j.inverse()).toRotationMatrix() * Sophus::SO3<T>::hat(r_te_ri - r_te_rj);
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
-      dr_dwb = sqrt_info * de_dwb;
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwj{jacobians[2]};
+      dr_dwj = sqrt_info * de_dwj;
     }
     if (jacobians[3] != nullptr) {
-      Eigen::Matrix<T, 6, 3> de_dtb;
-      // d/dtb e_w = 0
-      de_dtb.setZero();
-      // d/dtb e_t = -a_R_b·r_R_b^{-1}
-      de_dtb.template block<3, 3>(3, 0) = -(a_qm_b * r_qe_b.inverse()).toRotationMatrix();
+      Eigen::Matrix<T, 6, 3> de_dtj;
+      // d/dtj e_w = 0
+      de_dtj.setZero();
+      // d/dtj e_t = -i_R_j·r_R_j^{-1}
+      de_dtj.template block<3, 3>(3, 0) = -(i_qm_j * r_qe_j.inverse()).toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
-      dr_dtb = sqrt_info * de_dtb;
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtj{jacobians[3]};
+      dr_dtj = sqrt_info * de_dtj;
     }
   }
 
