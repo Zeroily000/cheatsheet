@@ -1,15 +1,14 @@
 #include "examples/ceres_solver/factors/utils.h"
 
 template <typename T>
-bool EvaluateRightOplus(
-    Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
-    Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb, Eigen::Quaternion<T> const & a_qm_b,
-    Eigen::Matrix<T, 3, 1> const & a_tm_ab,
-    Eigen::Matrix<T, Constants::kPoseErrorSize, Constants::kPoseErrorSize> sqrt_info,
-    Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 1>> & whitened_error, T ** jacobians) {
-  Eigen::Matrix<T, Constants::kPoseErrorSize, 1> error;
+bool EvaluateRightOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
+                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
+                        Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
+                        Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
+                        Eigen::Quaternion<T> const & a_qm_b, Eigen::Matrix<T, 3, 1> const & a_tm_ab,
+                        Eigen::Matrix<T, 6, 6> sqrt_info,
+                        Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) {
+  Eigen::Matrix<T, 6, 1> error;
   Eigen::Quaternion<T> const b_qe_r{r_qe_b.inverse()};
   Eigen::Quaternion<T> const b_qe_a{b_qe_r * r_qe_a};
   error.template head<3>() = Sophus::SO3<T>{b_qe_a * a_qm_b}.log();
@@ -18,89 +17,48 @@ bool EvaluateRightOplus(
 
   if (jacobians != nullptr) {
     if (jacobians[0] != nullptr) {
-      // clang-format off
-        /**
-         * d/dwa e_w = d/dwa Log(r_R_b^{-1}·r_R_a·Exp(wa)·a_R_b)
-         *           = d/dwa Log(r_R_b^{-1}·r_R_a·Exp(wa)·a_R_b)
-         *           = d/dwa Log(r_R_b^{-1}·r_R_a·a_R_b·Exp(a_R_b^{-1}·wa))
-         *           = d/dwa Log(e_R·Exp(a_R_b^{-1}·wa))
-         *           = d/dwa Log(Exp(e_w + Jr^{-1}(e_w)·(a_R_b^{-1}·wa)))
-         *           = Jr^{-1}(e_w)·a_R_b^{-1}
-         *
-         * d/dwa e_t = d/dwa (r_R_b^{-1}·r_R_a·Exp(wa)·a_t_ab
-         *           = d/dwa (r_R_b^{-1}·r_R_a·(I + [wa]x)·a_t_ab
-         *           = d/dwa (r_R_b^{-1}·r_R_a·[wa]x·a_t_ab)
-         *           = d/dwa -(r_R_b^{-1}·r_R_a·[a_t_ab]x·wa)
-         *           = -r_R_b^{-1}·r_R_a·[a_t_ab]x
-         */
-      // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 4> de_dwa;
+      Eigen::Matrix<T, 6, 4> de_dwa;
       de_dwa.setZero();
+      // d/dwa e_w = Jr^{-1}(e_w)·a_R_b^{-1}
       de_dwa.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(error.template head<3>()) *
           a_qm_b.inverse().toRotationMatrix();
+      // d/dwa e_t = -r_R_b^{-1}·r_R_a·[a_t_ab]x
       de_dwa.template block<3, 3>(3, 0) = b_qe_a * Sophus::SO3<T>::hat(-a_tm_ab);
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 4, Eigen::RowMajor>> dr_dwa{
-          jacobians[0]};
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
       dr_dwa = sqrt_info * de_dwa;
     }
     if (jacobians[1] != nullptr) {
-      // clang-format off
-        /**
-         * d/dta e_w = 0
-         *
-         * d/dta e_t = r_R_b^{-1}
-         */
-      // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 3> de_dta;
+      Eigen::Matrix<T, 6, 3> de_dta;
+      // d/dta e_w = 0
       de_dta.setZero();
+      // d/dta e_t = r_R_b^{-1}
       de_dta.template block<3, 3>(3, 0) = b_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 3, Eigen::RowMajor>> dr_dta{
-          jacobians[1]};
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
       dr_dta = sqrt_info * de_dta;
     }
     if (jacobians[2] != nullptr) {
-      // clang-format off
-        /**
-         * d/dwb e_w = d/dwb Log((r_R_b·Exp(wb))^{-1}·r_R_a·a_R_b)
-         *           = d/dwb Log(Exp(-wb)·r_R_b^{-1}·r_R_a·a_R_b)
-         *           = d/dwb Log(Exp(-wb)·e_R)
-         *           = d/dwb Log(Exp(e_w - Jl^{-1}(e_w)·wb))
-         *           = -Jl^{-1}(e_w)
-         *
-         * d/dwb e_t = d/dwb (r_R_b·Exp(wb))^{-1}·(r_R_a·a_t_ab + r_t_ra - r_t_rb)
-         *           = d/dwb Exp(-wb)·r_R_b ^{-1}·(r_R_a·a_t_ab + r_t_ra - r_t_rb)
-         *           = d/dwb (I - [w]x)·e_t
-         *           = d/dwb -[w]x·e_t
-         *           = [e_t]x
-         */
-      // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 4> de_dwb;
+      Eigen::Matrix<T, 6, 4> de_dwb;
       de_dwb.setZero();
+      // d/dwb e_w = -Jl^{-1}(e_w)
       de_dwb.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>());
+      // d/dwb e_t = [e_t]x
       de_dwb.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 4, Eigen::RowMajor>> dr_dwb{
-          jacobians[2]};
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
       dr_dwb = sqrt_info * de_dwb;
     }
     if (jacobians[3] != nullptr) {
-      // clang-format off
-        /**
-         * d/dtb e_w = 0
-         *
-         * d/dtb e_t = -r_R_b^{-1}
-         */
-      // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 3> de_dtb;
+      Eigen::Matrix<T, 6, 3> de_dtb;
+      // d/dtb e_w = 0
       de_dtb.setZero();
+      // d/dtb e_t = -r_R_b^{-1}
       de_dtb.template block<3, 3>(3, 0) = -b_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 3, Eigen::RowMajor>> dr_dtb{
-          jacobians[3]};
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
       dr_dtb = sqrt_info * de_dtb;
     }
   }
@@ -114,9 +72,8 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
                               Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
                               Eigen::Quaternion<T> const & a_qm_b,
                               Eigen::Matrix<T, 3, 1> const & a_tm_ab,
-                              Eigen::Matrix<T, Constants::kPoseErrorSize, Constants::kPoseErrorSize> sqrt_info,
-                              Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 1>> & whitened_error,
-                              T ** jacobians) {
+                              Eigen::Matrix<T, 6, 6> sqrt_info,
+                              Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) {
   // clang-format off
   /**
    * a_T_b·e = z
@@ -136,7 +93,7 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
   // clang-format on
   Eigen::Quaternion<T> const b_qe_r{r_qe_b.inverse()};
   Eigen::Quaternion<T> const a_qe_r{r_qe_a.inverse()};
-  Eigen::Matrix<T, Constants::kPoseErrorSize, 1> error;
+  Eigen::Matrix<T, 6, 1> error;
   error.template head<3>() = Sophus::SO3<T>{a_qm_b * b_qe_r * r_qe_a}.log();
   error.template tail<3>() = a_qm_b * b_qe_r * (r_te_ra - r_te_rb) + a_tm_ab;
 
@@ -156,13 +113,13 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
        */
       // clang-format on
 
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 4> de_dwa;
+      Eigen::Matrix<T, 6, 4> de_dwa;
       de_dwa.setZero();
       de_dwa.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
           a_qe_r.toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwa{jacobians[0]};
       dr_dwa = sqrt_info * de_dwa;
     }
     if (jacobians[1] != nullptr) {
@@ -173,11 +130,11 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
        * d/dta e_t = a_R_b·r_R_b^{-1}
        */
       // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 3> de_dta;
+      Eigen::Matrix<T, 6, 3> de_dta;
       de_dta.setZero();
       de_dta.template block<3, 3>(3, 0) = (a_qm_b * r_qe_b.inverse()).toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dta{jacobians[1]};
       dr_dta = sqrt_info * de_dta;
     }
     if (jacobians[2] != nullptr) {
@@ -198,7 +155,7 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
        *           = a_R_b·r_R_b^{-1}·[r_t_ra - r_t_rb]x
        */
       // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 4> de_dwb;
+      Eigen::Matrix<T, 6, 4> de_dwb;
       de_dwb.setZero();
       de_dwb.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
@@ -206,7 +163,7 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
       de_dwb.template block<3, 3>(3, 0) =
           (a_qm_b * r_qe_b.inverse()).toRotationMatrix() * Sophus::SO3<T>::hat(r_te_ra - r_te_rb);
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwb{jacobians[2]};
       dr_dwb = sqrt_info * de_dwb;
     }
     if (jacobians[3] != nullptr) {
@@ -217,11 +174,11 @@ static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_q
        * d/dt e_t = -a_R_b·r_R_b^{-1}
        */
       // clang-format on
-      Eigen::Matrix<T, Constants::kPoseErrorSize, 3> de_dtb;
+      Eigen::Matrix<T, 6, 3> de_dtb;
       de_dtb.setZero();
       de_dtb.template block<3, 3>(3, 0) = -(a_qm_b * r_qe_b.inverse()).toRotationMatrix();
 
-      Eigen::Map<Eigen::Matrix<T, Constants::kPoseErrorSize, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtb{jacobians[3]};
       dr_dtb = sqrt_info * de_dtb;
     }
   }
