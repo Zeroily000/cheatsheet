@@ -23,12 +23,29 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
   bool Evaluate(double const * const * parameters, double * residuals,
                 double ** jacobians) const override;
 
- private:
   template <typename T>
-  bool EvaluateRightOplus(T const * const * parameters, T * residuals, T ** jacobians) const;
+  static bool EvaluateRightOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
+                                 Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
+                                 Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
+                                 Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
+                                 Eigen::Quaternion<T> const & a_qm_b,
+                                 Eigen::Matrix<T, 3, 1> const & a_tm_ab,
+                                 Eigen::Matrix<T, kResidualSize, kResidualSize> sqrt_info,
+                                 Eigen::Map<Eigen::Matrix<T, kResidualSize, 1>> & whitened_error,
+                                 T ** jacobians);
 
   template <typename T>
-  bool EvaluateLeftOplus(T const * const * parameters, T * residuals, T ** jacobians) const;
+  static bool EvaluateLeftOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
+                                Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
+                                Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
+                                Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
+                                Eigen::Quaternion<T> const & a_qm_b,
+                                Eigen::Matrix<T, 3, 1> const & a_tm_ab,
+                                Eigen::Matrix<T, kResidualSize, kResidualSize> sqrt_info,
+                                Eigen::Map<Eigen::Matrix<T, kResidualSize, 1>> & whitened_error,
+                                T ** jacobians);
+
+ private:
 
   RotationManifold const * const rotation_manifold_;
 

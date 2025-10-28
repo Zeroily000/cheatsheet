@@ -9,8 +9,11 @@ namespace {
 
 struct AutoDiffBetweenFactor {
   AutoDiffBetweenFactor(Eigen::Quaterniond a_R_b, Eigen::Vector3d a_t_b,
-                        Eigen::Matrix<double, 6, 6> sqrt_info)
-      : a_q_b_{std::move(a_R_b)}, a_t_ab_{std::move(a_t_b)}, sqrt_info_{std::move(sqrt_info)} {}
+                        Eigen::Matrix<double, 6, 6> sqrt_info, BetweenFactor const * const factor)
+      : a_q_b_{std::move(a_R_b)},
+        a_t_ab_{std::move(a_t_b)},
+        sqrt_info_{std::move(sqrt_info)},
+        factor_{factor} {}
 
   template <typename T>
   bool operator()(T const * const qa, T const * const ta, T const * const qb, T const * const tb,
@@ -45,16 +48,22 @@ struct AutoDiffBetweenFactor {
     res = sqrt_info_.cast<T>() * error;
 
     return true;
+
+    // std::array<T const*, 4> const parameters{qa, ta, qb, tb};
+    // return factor_->Evaluate(parameters.data(), residuals, nullptr);
+
   }
 
   static ceres::CostFunction * Create(Eigen::Quaterniond const & a_R_b,
                                       Eigen::Vector3d const & a_t_b,
-                                      Eigen::Matrix<double, 6, 6> const & sqrt_info) {
+                                      Eigen::Matrix<double, 6, 6> const & sqrt_info,
+                                      BetweenFactor const * const factor) {
     return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
-        new AutoDiffBetweenFactor{a_R_b, a_t_b, sqrt_info});
+        new AutoDiffBetweenFactor{a_R_b, a_t_b, sqrt_info, factor});
   }
 
  private:
+  BetweenFactor const * const factor_;
   Eigen::Quaterniond a_q_b_;
   Eigen::Vector3d a_t_ab_;
   Eigen::Matrix<double, 6, 6> sqrt_info_;
@@ -240,8 +249,6 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
                                       dr_dwb_analytic.data(), dr_dtb_analytic.data()};
     factor.Evaluate(parameters.data(), residuals.data(), jacobians.data());
   }
-  std::cout << dr_dwa_analytic.leftCols(3) << std::endl;
-  std::cout << std::endl;
 
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa;
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqb;
@@ -251,7 +258,7 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
   manifold->PlusJacobian(qb.coeffs().data(), dqb_dwb.data());
 
-  auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
+  auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info, &factor);
 
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
