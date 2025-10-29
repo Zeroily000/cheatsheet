@@ -10,7 +10,7 @@
 template <RotationUpdateMode mode>
 class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
  public:
-  BetweenFactor(Eigen::Quaterniond a_q_b, Eigen::Vector3d a_t_ab,
+  BetweenFactor(Eigen::Quaterniond i_qm_j, Eigen::Vector3d i_tm_ij,
                 Eigen::Matrix<double, 6, 6> sqrt_info);
 
   ~BetweenFactor() override;
@@ -30,10 +30,10 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
                               T ** jacobians);
 
  private:
-  // Rotation from frame b to frame a
-  Eigen::Quaterniond a_q_b_;
-  // Translation from frame a to frame b, represented in a.
-  Eigen::Vector3d a_t_ab_;
+  // Rotation from frame j to frame i.
+  Eigen::Quaterniond i_qm_j_;
+  // Translation from frame i to frame j, represented in i.
+  Eigen::Vector3d i_tm_ij_;
 
   Eigen::Matrix<double, 6, 6> sqrt_info_;
 };

@@ -28,9 +28,8 @@ struct AutoDiffBetweenFactor {
         r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
   }
 
-  static ceres::CostFunction * Create(Eigen::Quaterniond const & a_q_b,
-                                      Eigen::Vector3d const & a_t_ab,
-                                      Eigen::Matrix<double, 6, 6> const & sqrt_info) {
+  static auto * Create(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
+                       Eigen::Matrix<double, 6, 6> const & sqrt_info) {
     return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
         new AutoDiffBetweenFactor{a_q_b, a_t_ab, sqrt_info});
   }

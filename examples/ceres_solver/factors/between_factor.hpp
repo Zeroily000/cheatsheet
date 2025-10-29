@@ -3,9 +3,9 @@
 #include "examples/ceres_solver/factors/between_factor.h"
 
 template <RotationUpdateMode mode>
-BetweenFactor<mode>::BetweenFactor(Eigen::Quaterniond a_q_b, Eigen::Vector3d a_t_ab,
+BetweenFactor<mode>::BetweenFactor(Eigen::Quaterniond i_qm_j, Eigen::Vector3d i_tm_ij,
                                    Eigen::Matrix<double, 6, 6> sqrt_info)
-    : a_q_b_{std::move(a_q_b)}, a_t_ab_{std::move(a_t_ab)}, sqrt_info_{std::move(sqrt_info)} {}
+    : i_qm_j_{std::move(i_qm_j)}, i_tm_ij_{std::move(i_tm_ij)}, sqrt_info_{std::move(sqrt_info)} {}
 
 template <RotationUpdateMode mode>
 BetweenFactor<mode>::~BetweenFactor() = default;
@@ -13,12 +13,12 @@ BetweenFactor<mode>::~BetweenFactor() = default;
 template <RotationUpdateMode mode>
 bool BetweenFactor<mode>::Evaluate(double const * const * parameters, double * residuals,
                                    double ** jacobians) const {
-  Eigen::Map<Eigen::Quaterniond const> const r_qe_a{parameters[0]};
-  Eigen::Map<Eigen::Vector3d const> const r_te_ra{parameters[1]};
-  Eigen::Map<Eigen::Quaterniond const> const r_qe_b{parameters[2]};
-  Eigen::Map<Eigen::Vector3d const> const r_te_rb{parameters[3]};
+  Eigen::Map<Eigen::Quaterniond const> const r_qe_i{parameters[0]};
+  Eigen::Map<Eigen::Vector3d const> const r_te_ri{parameters[1]};
+  Eigen::Map<Eigen::Quaterniond const> const r_qe_j{parameters[2]};
+  Eigen::Map<Eigen::Vector3d const> const r_te_rj{parameters[3]};
   Eigen::Map<Eigen::Matrix<double, 6, 1>> whitened_error{residuals};
-  return ComputeResidual(r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_q_b_, a_t_ab_, sqrt_info_,
+  return ComputeResidual(r_qe_i, r_te_ri, r_qe_j, r_te_rj, i_qm_j_, i_tm_ij_, sqrt_info_,
                          whitened_error, jacobians);
 }
 
