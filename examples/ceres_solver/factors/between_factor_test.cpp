@@ -8,8 +8,9 @@
 namespace {
 
 struct AutoDiffBetweenFactor {
-  AutoDiffBetweenFactor(BetweenFactor<RotationUpdateMode::kLeft> const * const factor)
-      : factor_{factor} {}
+  AutoDiffBetweenFactor(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
+                        Eigen::Matrix<double, 6, 6> const & sqrt_info)
+      : a_q_b_{std::move(a_q_b)}, a_t_ab_{std::move(a_t_ab)}, sqrt_info_{std::move(sqrt_info)} {}
 
   template <typename T>
   bool operator()(T const * const qa, T const * const ta, T const * const qb, T const * const tb,
@@ -18,19 +19,29 @@ struct AutoDiffBetweenFactor {
     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_ra{ta};
     Eigen::Map<Eigen::Quaternion<T> const> const r_qe_b{qb};
     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_rb{tb};
+    Eigen::Quaternion<T> const a_qm_b{a_q_b_.cast<T>()};
+    Eigen::Matrix<T, 3, 1> const a_tm_ab{a_t_ab_.cast<T>()};
+    Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
     Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
     T ** jacobians{nullptr};
-    return factor_->Evaluate(r_qe_a, r_te_ra, r_qe_b, r_te_rb, whitened_error, jacobians);
+    return BetweenFactor<RotationUpdateMode::kLeft>::ComputeResidual(
+        r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
   }
 
-  static ceres::CostFunction * Create(
-      BetweenFactor<RotationUpdateMode::kLeft> const * const factor) {
+  static ceres::CostFunction * Create(Eigen::Quaterniond const & a_q_b,
+                                      Eigen::Vector3d const & a_t_ab,
+                                      Eigen::Matrix<double, 6, 6> const & sqrt_info) {
     return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
-        new AutoDiffBetweenFactor{factor});
+        new AutoDiffBetweenFactor{a_q_b, a_t_ab, sqrt_info});
   }
 
  private:
-  BetweenFactor<RotationUpdateMode::kLeft> const * const factor_;
+  // Rotation from frame b to frame a
+  Eigen::Quaterniond a_q_b_;
+  // Translation from frame a to frame b, represented in a.
+  Eigen::Vector3d a_t_ab_;
+
+  Eigen::Matrix<double, 6, 6> sqrt_info_;
 };
 
 }  // namespace
@@ -222,7 +233,7 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
   manifold->PlusJacobian(qb.coeffs().data(), dqb_dwb.data());
 
-  auto const * autodiff_factor = AutoDiffBetweenFactor::Create(&factor);
+  auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
 
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;

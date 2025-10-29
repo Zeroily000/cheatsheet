@@ -19,31 +19,15 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
                 double ** jacobians) const override;
 
   template <typename T>
-  bool Evaluate(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
-                Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
-                Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
-                Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
-                Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) const;
-
-  // template <typename T>
-  // bool Evaluate(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_a,
-  //               Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ra,
-  //               Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_b,
-  //               Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rb,
-  //               Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians) const {
-  //   Eigen::Quaternion<T> const a_qm_b{a_q_b_.cast<T>()};
-  //   Eigen::Matrix<T, 3, 1> const a_tm_ab{a_t_ab_.cast<T>()};
-  //   Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
-  //   if (mode == RotationUpdateMode::kRight) {
-  //     return EvaluateRightOplus(r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info,
-  //                               whitened_error, jacobians);
-  //   }
-  //   if (mode == RotationUpdateMode::kLeft) {
-  //     return EvaluateLeftOplus(r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info,
-  //                              whitened_error, jacobians);
-  //   }
-  //   return false;
-  // }
+  static bool ComputeResidual(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_i,
+                              Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ri,
+                              Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_j,
+                              Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rj,
+                              Eigen::Quaternion<T> const & i_qm_j,
+                              Eigen::Matrix<T, 3, 1> const & i_tm_ij,
+                              Eigen::Matrix<T, 6, 6> sqrt_info,
+                              Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error,
+                              T ** jacobians);
 
  private:
   // Rotation from frame b to frame a
