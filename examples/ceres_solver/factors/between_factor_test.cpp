@@ -24,7 +24,7 @@ struct AutoDiffBetweenFactor {
     Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
     Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
     T ** jacobians{nullptr};
-    return BetweenFactor<RotationUpdateMode::kLeft>::ComputeResidual(
+    return BetweenFactor<RotationUpdateMode::kLeft>::Evaluate(
         r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
   }
 
@@ -46,7 +46,7 @@ struct AutoDiffBetweenFactor {
 }  // namespace
 
 TEST(RotationManifoldTest, TestRightPerturbation) {
-  RotationManifold rotation_manifold;
+  // RotationManifold rotation_manifold;
   Eigen::Quaterniond const qa{Eigen::Quaterniond::UnitRandom()};
   Eigen::Vector3d const ta{Eigen::Vector3d::Random()};
   Eigen::Quaterniond const qb{Eigen::Quaterniond::UnitRandom()};
@@ -199,7 +199,7 @@ TEST(RotationManifoldTest, TestRightPerturbation) {
 }
 
 TEST(RotationManifoldTest, TestLeftPerturbation) {
-  RotationManifold rotation_manifold{RotationManifold::Mode::kLeftPerturbation};
+  // RotationManifold rotation_manifold{RotationManifold::Mode::kLeftPerturbation};
   Eigen::Quaterniond const qa{Eigen::Quaterniond::UnitRandom()};
   Eigen::Vector3d const ta{Eigen::Vector3d::Random()};
   Eigen::Quaterniond const qb{Eigen::Quaterniond::UnitRandom()};
