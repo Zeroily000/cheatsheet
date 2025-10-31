@@ -7,7 +7,6 @@ cc_library(
     srcs = ["between_factor.h"],
     hdrs = ["between_factor.hpp"],
     deps = [
-        "//examples/ceres_solver/common:residuals",
         "//examples/ceres_solver/common:rotation_manifold",
         "@ceres-solver//:ceres",
         "@eigen",
