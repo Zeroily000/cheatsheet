@@ -1,28 +1,79 @@
 #pragma once
 
-#include <ceres/ceres.h>
+#include <sophus/so3.hpp>
+#include <utility>
 
-class RotationManifold : public ceres::Manifold {
- public:
-  static constexpr std::size_t kAmbientSize{4};
-  static constexpr std::size_t kTangentSize{3};
+#include "examples/ceres_solver/common/rotation_manifold.h"
 
-  enum class Mode {
-    kRightPerturbation = 0,
-    kLeftPerturbation = 1,
-  };
+template <RotationUpdateMode mode>
+RotationManifold<mode>::RotationManifold() = default;
 
-  RotationManifold(Mode mode = Mode::kRightPerturbation);
-  ~RotationManifold();
-  int AmbientSize() const override;
-  int TangentSize() const override;
-  bool Plus(double const * x, double const * delta, double * x_plus_delta) const override;
-  bool PlusJacobian(double const * x, double * jacobian) const override;
-  bool Minus(double const * y, double const * x, double * y_minus_x) const override;
-  bool MinusJacobian(double const * x, double * jacobian) const override;
+template <RotationUpdateMode mode>
+RotationManifold<mode>::~RotationManifold() = default;
 
-  Mode const & GetMode() const;
+template <RotationUpdateMode mode>
+int RotationManifold<mode>::AmbientSize() const {
+  return 4;
+}
 
- private:
-  Mode const mode_;
-};
+template <RotationUpdateMode mode>
+int RotationManifold<mode>::TangentSize() const {
+  return 3;
+}
+
+template <>
+bool RotationManifold<RotationUpdateMode::kRight>::Plus(double const * const x,
+                                                        double const * const delta,
+                                                        double * const x_plus_delta) const {
+  Eigen::Map<Eigen::Quaterniond const> const q0{x};
+  Eigen::Map<Eigen::Vector3d const> const dw{delta};
+  Eigen::Map<Eigen::Quaterniond> q1{x_plus_delta};
+  q1 = (Sophus::SO3d{q0} * Sophus::SO3d::exp(dw)).unit_quaternion();
+  return true;
+}
+
+template <>
+bool RotationManifold<RotationUpdateMode::kLeft>::Plus(double const * const x,
+                                                       double const * const delta,
+                                                       double * const x_plus_delta) const {
+  Eigen::Map<Eigen::Quaterniond const> const q0{x};
+  Eigen::Map<Eigen::Vector3d const> const dw{delta};
+  Eigen::Map<Eigen::Quaterniond> q1{x_plus_delta};
+  q1 = (Sophus::SO3d::exp(dw) * Sophus::SO3d{q0}).unit_quaternion();
+  return true;
+}
+
+template <RotationUpdateMode mode>
+bool RotationManifold<mode>::PlusJacobian(double const * const /* x */,
+                                          double * const jacobian) const {
+  Eigen::Map<Eigen::Matrix<double, 4, 3, Eigen::RowMajor>> dummy{jacobian};
+  dummy.setIdentity();
+  return true;
+}
+
+template <>
+bool RotationManifold<RotationUpdateMode::kRight>::Minus(double const * const y,
+                                                         double const * const x,
+                                                         double * const y_minus_x) const {
+  Eigen::Map<Eigen::Quaterniond const> const q1{y};
+  Eigen::Map<Eigen::Quaterniond const> const q0{x};
+  Eigen::Map<Eigen::Vector3d> dw{y_minus_x};
+  dw = Sophus::SO3d{q0.inverse() * q1}.log();
+  return true;
+}
+
+template <>
+bool RotationManifold<RotationUpdateMode::kLeft>::Minus(double const * const y,
+                                                        double const * const x,
+                                                        double * const y_minus_x) const {
+  Eigen::Map<Eigen::Quaterniond const> const q1{y};
+  Eigen::Map<Eigen::Quaterniond const> const q0{x};
+  Eigen::Map<Eigen::Vector3d> dw{y_minus_x};
+  dw = Sophus::SO3d{q1 * q0.inverse()}.log();
+  return true;
+}
+
+template <RotationUpdateMode mode>
+bool RotationManifold<mode>::MinusJacobian(double const * x, double * jacobian) const {
+  return false;
+}

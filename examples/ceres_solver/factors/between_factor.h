@@ -5,7 +5,6 @@
 #include <sophus/so3.hpp>
 
 #include "examples/ceres_solver/common/rotation_manifold.hpp"
-#include "examples/ceres_solver/factors/utils.hpp"
 
 template <RotationUpdateMode mode>
 class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {

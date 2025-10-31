@@ -1,5 +1,6 @@
 #pragma once
 
+#include "examples/ceres_solver/common/residuals.hpp"
 #include "examples/ceres_solver/factors/between_factor.h"
 
 template <RotationUpdateMode mode>

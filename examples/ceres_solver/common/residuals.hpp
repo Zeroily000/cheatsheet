@@ -1,6 +1,8 @@
 #pragma once
 
-#include "examples/ceres_solver/factors/utils.h"
+#include <sophus/so3.hpp>
+
+#include "examples/ceres_solver/common/residuals.h"
 
 template <typename T>
 bool EvaluateRightOplus(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_i,

@@ -34,20 +34,24 @@ cc_library(
 )
 
 cc_library(
-    name = "rotation_manifold",
-    srcs = ["rotation_manifold.cpp"],
-    hdrs = ["rotation_manifold.hpp"],
+    name = "residuals",
+    srcs = ["residuals.h"],
+    hdrs = ["residuals.hpp"],
     deps = [
-        ":types",
-        "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
     ],
 )
 
 cc_library(
-    name = "types",
-    hdrs = ["types.hpp"],
+    name = "rotation_manifold",
+    srcs = ["rotation_manifold.h"],
+    hdrs = ["rotation_manifold.hpp"],
+    deps = [
+        "@ceres-solver//:ceres",
+        "@eigen",
+        "@sophus",
+    ],
 )
 
 cc_test(
