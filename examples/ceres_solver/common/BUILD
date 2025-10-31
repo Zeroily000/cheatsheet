@@ -7,7 +7,18 @@ cc_library(
     srcs = ["rotation_manifold.h"],
     hdrs = ["rotation_manifold.hpp"],
     deps = [
+        ":quaternion_utils",
         "@ceres-solver//:ceres",
+        "@eigen",
+        "@sophus",
+    ],
+)
+
+cc_library(
+    name = "quaternion_utils",
+    srcs = ["quaternion_utils.cpp"],
+    hdrs = ["quaternion_utils.hpp"],
+    deps = [
         "@eigen",
         "@sophus",
     ],
