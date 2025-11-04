@@ -14,6 +14,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "prior_factor",
+    srcs = ["prior_factor.h"],
+    hdrs = ["prior_factor.hpp"],
+    deps = [
+        "//examples/ceres_solver/common:rotation_manifold",
+        "@ceres-solver//:ceres",
+        "@eigen",
+        "@sophus",
+    ],
+)
+
+
 cc_test(
     name = "between_factor_test",
     srcs = ["between_factor_test.cpp"],
