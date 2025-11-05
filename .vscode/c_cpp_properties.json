@@ -14,7 +14,7 @@
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/googletest+/googletest/include",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/sophus+/**",
         "${workspaceFolder}/bazel-${workspaceFolderBasename}/external/glfw+/include",
-        "${workspaceFolder}/bazel-bin/external/glog+/_virtual_includes/glog",
+        "${workspaceFolder}/bazel-bin/external/glog+/_virtual_includes/glog/**",
         "${workspaceFolder}/bazel-bin/external/gflags+/_virtual_includes/gflags",
         "${workspaceFolder}/third_party/glad/include"
       ],
