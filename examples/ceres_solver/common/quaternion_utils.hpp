@@ -49,3 +49,19 @@ Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionRightUpdateJacobian(
   return static_cast<T>(.5) *
          QuaternionLeftMultiplicationMatrix(quaternion).template block<4, 3>(0, 0);
 }
+
+template <typename Derived>
+Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionLeftUpdateJacobianInverse(
+    Eigen::QuaternionBase<Derived> const & quaternion) {
+  using T = typename Derived::Scalar;
+  return static_cast<T>(2) *
+         QuaternionRightMultiplicationMatrix(quaternion.inverse()).template block<3, 4>(0, 0);
+}
+
+template <typename Derived>
+Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionRightUpdateJacobianInverse(
+    Eigen::QuaternionBase<Derived> const & quaternion) {
+  using T = typename Derived::Scalar;
+  return static_cast<T>(2) *
+         QuaternionLeftMultiplicationMatrix(quaternion.inverse()).template block<3, 4>(0, 0);
+}
