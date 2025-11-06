@@ -33,6 +33,7 @@ cc_test(
     srcs = ["between_factor_test.cpp"],
     deps = [
         ":between_factor",
+        "//examples/ceres_solver/common:rotation_manifold",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
