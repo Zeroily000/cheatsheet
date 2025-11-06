@@ -3,18 +3,15 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "examples/ceres_solver/common/rotation_manifold.hpp"
+#include "examples/ceres_solver/common/types.h"
 
 template <RotationUpdateMode mode>
-class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
+class BetweenFunctor {
  public:
-  BetweenFactor(Eigen::Quaterniond i_qm_j, Eigen::Vector3d i_tm_ij,
-                Eigen::Matrix<double, 6, 6> sqrt_info);
+  BetweenFunctor(Eigen::Quaterniond i_qm_j, Eigen::Vector3d i_tm_ij,
+                 Eigen::Matrix<double, 6, 6> sqrt_info);
 
-  ~BetweenFactor() override;
-
-  bool Evaluate(double const * const * parameters, double * residuals,
-                double ** jacobians) const override;
+  ~BetweenFunctor();
 
   /**
    * @brief This function computes the residual between two poses and the Jacobian w.r.t the
@@ -125,13 +122,8 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
    * @param[out] jacobians The jacobians of the residual w.r.t each parameter.
    */
   template <typename T>
-  static bool Evaluate(Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_i,
-                       Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_ri,
-                       Eigen::Map<Eigen::Quaternion<T> const> const & r_qe_j,
-                       Eigen::Map<Eigen::Matrix<T, 3, 1> const> const & r_te_rj,
-                       Eigen::Quaternion<T> const & i_qm_j, Eigen::Matrix<T, 3, 1> const & i_tm_ij,
-                       Eigen::Matrix<T, 6, 6> sqrt_info,
-                       Eigen::Map<Eigen::Matrix<T, 6, 1>> & whitened_error, T ** jacobians);
+  bool operator()(T const * parameter0, T const * parameter1, T const * parameter2,
+                  T const * parameter3, T * residuals, T ** jacobians = nullptr) const;
 
  private:
   // Rotation from frame j to frame i.
@@ -140,4 +132,24 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
   Eigen::Vector3d i_tm_ij_;
   // The square root of the information matrix.
   Eigen::Matrix<double, 6, 6> sqrt_info_;
+};
+
+template <RotationUpdateMode mode>
+class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
+ public:
+  BetweenFactor(Eigen::Quaterniond const & i_qm_j, Eigen::Vector3d const & i_tm_ij,
+                Eigen::Matrix<double, 6, 6> const & sqrt_info);
+
+  ~BetweenFactor() override;
+
+  bool Evaluate(double const * const * parameters, double * residuals,
+                double ** jacobians) const override;
+
+  static ceres::CostFunction * Create(Eigen::Quaterniond const & i_qm_j,
+                                      Eigen::Vector3d const & i_tm_ij,
+                                      Eigen::Matrix<double, 6, 6> const & sqrt_info,
+                                      JacobianComputationMethod const & method);
+
+ private:
+  BetweenFunctor<mode> functor_;
 };

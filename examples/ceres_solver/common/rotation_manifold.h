@@ -1,9 +1,6 @@
 #include <ceres/ceres.h>
 
-enum class RotationUpdateMode {
-  kRight,
-  kLeft,
-};
+#include "examples/ceres_solver/common/types.h"
 
 template <RotationUpdateMode mode>
 class RotationManifold : public ceres::Manifold {

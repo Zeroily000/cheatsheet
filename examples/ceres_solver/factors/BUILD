@@ -7,7 +7,8 @@ cc_library(
     srcs = ["between_factor.h"],
     hdrs = ["between_factor.hpp"],
     deps = [
-        "//examples/ceres_solver/common:rotation_manifold",
+        "//examples/ceres_solver/common:quaternion_utils",
+        "//examples/ceres_solver/common:types",
         "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
@@ -19,13 +20,13 @@ cc_library(
     srcs = ["prior_factor.h"],
     hdrs = ["prior_factor.hpp"],
     deps = [
-        "//examples/ceres_solver/common:rotation_manifold",
+        "//examples/ceres_solver/common:quaternion_utils",
+        "//examples/ceres_solver/common:types",
         "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
     ],
 )
-
 
 cc_test(
     name = "between_factor_test",

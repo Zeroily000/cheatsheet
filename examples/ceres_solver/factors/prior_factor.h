@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "examples/ceres_solver/common/rotation_manifold.hpp"
+#include "examples/ceres_solver/common/types.h"
 
 template <RotationUpdateMode mode>
 class PriorFunctor {

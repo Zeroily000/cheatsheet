@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["rotation_manifold.hpp"],
     deps = [
         ":quaternion_utils",
+        ":types",
         "@ceres-solver//:ceres",
         "@eigen",
         "@sophus",
@@ -24,6 +25,11 @@ cc_library(
         "@eigen",
         "@sophus",
     ],
+)
+
+cc_library(
+    name = "types",
+    hdrs = ["types.h"],
 )
 
 cc_test(

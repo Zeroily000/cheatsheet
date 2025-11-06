@@ -7,41 +7,41 @@
 
 namespace {
 
-struct AutoDiffBetweenFactor {
-  AutoDiffBetweenFactor(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
-                        Eigen::Matrix<double, 6, 6> const & sqrt_info)
-      : a_q_b_{std::move(a_q_b)}, a_t_ab_{std::move(a_t_ab)}, sqrt_info_{std::move(sqrt_info)} {}
+// struct AutoDiffBetweenFactor {
+//   AutoDiffBetweenFactor(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
+//                         Eigen::Matrix<double, 6, 6> const & sqrt_info)
+//       : a_q_b_{std::move(a_q_b)}, a_t_ab_{std::move(a_t_ab)}, sqrt_info_{std::move(sqrt_info)} {}
 
-  template <typename T>
-  bool operator()(T const * const qa, T const * const ta, T const * const qb, T const * const tb,
-                  T * const residuals) const {
-    Eigen::Map<Eigen::Quaternion<T> const> const r_qe_a{qa};
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_ra{ta};
-    Eigen::Map<Eigen::Quaternion<T> const> const r_qe_b{qb};
-    Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_rb{tb};
-    Eigen::Quaternion<T> const a_qm_b{a_q_b_.cast<T>()};
-    Eigen::Matrix<T, 3, 1> const a_tm_ab{a_t_ab_.cast<T>()};
-    Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
-    Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
-    T ** jacobians{nullptr};
-    return BetweenFactor<RotationUpdateMode::kLeft>::Evaluate(
-        r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
-  }
+//   template <typename T>
+//   bool operator()(T const * const qa, T const * const ta, T const * const qb, T const * const tb,
+//                   T * const residuals) const {
+//     Eigen::Map<Eigen::Quaternion<T> const> const r_qe_a{qa};
+//     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_ra{ta};
+//     Eigen::Map<Eigen::Quaternion<T> const> const r_qe_b{qb};
+//     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_rb{tb};
+//     Eigen::Quaternion<T> const a_qm_b{a_q_b_.cast<T>()};
+//     Eigen::Matrix<T, 3, 1> const a_tm_ab{a_t_ab_.cast<T>()};
+//     Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
+//     Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
+//     T ** jacobians{nullptr};
+//     return BetweenFactor<RotationUpdateMode::kLeft>::Evaluate(
+//         r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
+//   }
 
-  static auto * Create(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
-                       Eigen::Matrix<double, 6, 6> const & sqrt_info) {
-    return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
-        new AutoDiffBetweenFactor{a_q_b, a_t_ab, sqrt_info});
-  }
+//   static auto * Create(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
+//                        Eigen::Matrix<double, 6, 6> const & sqrt_info) {
+//     return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
+//         new AutoDiffBetweenFactor{a_q_b, a_t_ab, sqrt_info});
+//   }
 
- private:
-  // Rotation from frame b to frame a
-  Eigen::Quaterniond a_q_b_;
-  // Translation from frame a to frame b, represented in a.
-  Eigen::Vector3d a_t_ab_;
+//  private:
+//   // Rotation from frame b to frame a
+//   Eigen::Quaterniond a_q_b_;
+//   // Translation from frame a to frame b, represented in a.
+//   Eigen::Vector3d a_t_ab_;
 
-  Eigen::Matrix<double, 6, 6> sqrt_info_;
-};
+//   Eigen::Matrix<double, 6, 6> sqrt_info_;
+// };
 
 }  // namespace
 
@@ -210,7 +210,10 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   Eigen::Quaterniond const qz{qa.inverse() * qb};
   Eigen::Vector3d const tz{qa.inverse() * (tb - ta)};
   Eigen::Matrix<double, 6, 6> sqrt_info{Eigen::Matrix<double, 6, 6>::Identity()};
-  BetweenFactor<RotationUpdateMode::kLeft> const factor{qz, tz, sqrt_info};
+  // BetweenFactor<RotationUpdateMode::kLeft> const factor{qz, tz, sqrt_info};
+  ceres::CostFunction const * const analytic_factor{
+      BetweenFactor<RotationUpdateMode::kLeft>::Create(qz, tz, sqrt_info,
+                                                       JacobianComputationMethod::kAnalytic)};
 
   Eigen::Matrix<double, 6, 1> residuals;
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dwa_analytic;
@@ -221,7 +224,7 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   {
     std::array<double *, 4> jacobians{dr_dwa_analytic.data(), dr_dta_analytic.data(),
                                       dr_dwb_analytic.data(), dr_dtb_analytic.data()};
-    factor.Evaluate(parameters.data(), residuals.data(), jacobians.data());
+    analytic_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
   }
 
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa;
@@ -232,7 +235,10 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
   manifold->PlusJacobian(qb.coeffs().data(), dqb_dwb.data());
 
-  auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
+  // auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
+  ceres::CostFunction const * const autodiff_factor{
+      BetweenFactor<RotationUpdateMode::kLeft>::Create(qz, tz, sqrt_info,
+                                                       JacobianComputationMethod::kAutomatic)};
 
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
@@ -251,5 +257,6 @@ TEST(RotationManifoldTest, TestLeftPerturbation) {
   EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_autodiff));
 
   delete manifold;
+  delete analytic_factor;
   delete autodiff_factor;
 }
