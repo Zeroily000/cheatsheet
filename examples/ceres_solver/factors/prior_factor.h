@@ -13,7 +13,8 @@ class PriorFunctor {
   ~PriorFunctor();
 
   template <typename T>
-  bool operator()(T const * parameter0, T const * parameter1, T * residuals, T ** jacobians = nullptr) const;
+  bool operator()(T const * parameter0, T const * parameter1, T * residuals,
+                  T ** jacobians = nullptr) const;
 
  private:
   Eigen::Quaterniond r_qm_i_;

@@ -55,7 +55,8 @@ bool RotationManifold<RotationUpdateMode::kRight>::PlusJacobian(double const * c
    */
   Eigen::Map<Eigen::Quaterniond const> const q{x};
   Eigen::Map<Eigen::Matrix<double, 4, 3, Eigen::RowMajor>> dq_dw{jacobian};
-  dq_dw = quaternionLeftMultiplicationMatrix(q).block<4, 3>(0, 0) * .5;
+  // dq_dw = QuaternionLeftMultiplicationMatrix(q).block<4, 3>(0, 0) * .5;
+  dq_dw = QuaternionRightUpdateJacobian(q);
   return true;
 }
 
@@ -71,7 +72,8 @@ bool RotationManifold<RotationUpdateMode::kLeft>::PlusJacobian(double const * co
    */
   Eigen::Map<Eigen::Quaterniond const> const q{x};
   Eigen::Map<Eigen::Matrix<double, 4, 3, Eigen::RowMajor>> dq_dw{jacobian};
-  dq_dw = quaternionRightMultiplicationMatrix(q).block<4, 3>(0, 0) * .5;
+  // dq_dw = QuaternionRightMultiplicationMatrix(q).block<4, 3>(0, 0) * .5;
+  dq_dw = QuaternionLeftUpdateJacobian(q);
   return true;
 }
 
@@ -114,7 +116,8 @@ bool RotationManifold<RotationUpdateMode::kRight>::MinusJacobian(double const * 
    */
   Eigen::Map<Eigen::Quaterniond const> const q{x};
   Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor>> dw_dq{jacobian};
-  dw_dq = quaternionLeftMultiplicationMatrix(q.inverse()).block<3, 4>(0, 0) * 2.;
+  // dw_dq = QuaternionLeftMultiplicationMatrix(q.inverse()).block<3, 4>(0, 0) * 2.;
+  dw_dq = QuaternionRightUpdateJacobianInverse(q);
   return true;
 }
 
@@ -135,6 +138,7 @@ bool RotationManifold<RotationUpdateMode::kLeft>::MinusJacobian(double const * x
    */
   Eigen::Map<Eigen::Quaterniond const> const q{x};
   Eigen::Map<Eigen::Matrix<double, 3, 4, Eigen::RowMajor>> dw_dq{jacobian};
-  dw_dq = quaternionRightMultiplicationMatrix(q.inverse()).block<3, 4>(0, 0) * 2.;
+  // dw_dq = QuaternionRightMultiplicationMatrix(q.inverse()).block<3, 4>(0, 0) * 2.;
+  dw_dq = QuaternionLeftUpdateJacobianInverse(q);
   return true;
 }
