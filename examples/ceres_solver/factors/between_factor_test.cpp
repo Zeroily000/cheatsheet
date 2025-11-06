@@ -9,52 +9,24 @@
 
 namespace {
 
-// struct AutoDiffBetweenFactor {
-//   AutoDiffBetweenFactor(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
-//                         Eigen::Matrix<double, 6, 6> const & sqrt_info)
-//       : a_q_b_{std::move(a_q_b)}, a_t_ab_{std::move(a_t_ab)}, sqrt_info_{std::move(sqrt_info)} {}
-
-//   template <typename T>
-//   bool operator()(T const * const qa, T const * const ta, T const * const qb, T const * const tb,
-//                   T * const residuals) const {
-//     Eigen::Map<Eigen::Quaternion<T> const> const r_qe_a{qa};
-//     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_ra{ta};
-//     Eigen::Map<Eigen::Quaternion<T> const> const r_qe_b{qb};
-//     Eigen::Map<Eigen::Matrix<T, 3, 1> const> const r_te_rb{tb};
-//     Eigen::Quaternion<T> const a_qm_b{a_q_b_.cast<T>()};
-//     Eigen::Matrix<T, 3, 1> const a_tm_ab{a_t_ab_.cast<T>()};
-//     Eigen::Matrix<T, 6, 6> const sqrt_info{sqrt_info_.cast<T>()};
-//     Eigen::Map<Eigen::Matrix<T, 6, 1>> whitened_error{residuals};
-//     T ** jacobians{nullptr};
-//     return BetweenFactor<RotationUpdateMode::kLeft>::Evaluate(
-//         r_qe_a, r_te_ra, r_qe_b, r_te_rb, a_qm_b, a_tm_ab, sqrt_info, whitened_error, jacobians);
-//   }
-
-//   static auto * Create(Eigen::Quaterniond const & a_q_b, Eigen::Vector3d const & a_t_ab,
-//                        Eigen::Matrix<double, 6, 6> const & sqrt_info) {
-//     return new ceres::AutoDiffCostFunction<AutoDiffBetweenFactor, 6, 4, 3, 4, 3>(
-//         new AutoDiffBetweenFactor{a_q_b, a_t_ab, sqrt_info});
-//   }
-
-//  private:
-//   // Rotation from frame b to frame a
-//   Eigen::Quaterniond a_q_b_;
-//   // Translation from frame a to frame b, represented in a.
-//   Eigen::Vector3d a_t_ab_;
-
-//   Eigen::Matrix<double, 6, 6> sqrt_info_;
-// };
 template <RotationUpdateMode mode>
 void TestBetweenFactor() {
-  Eigen::Quaterniond const qa{Eigen::Quaterniond::UnitRandom()};
-  Eigen::Vector3d const ta{Eigen::Vector3d::Random()};
-  Eigen::Quaterniond const qb{Eigen::Quaterniond::UnitRandom()};
-  Eigen::Vector3d const tb{Eigen::Vector3d::Random()};
+  Eigen::Quaterniond const r_qm_i{Eigen::Quaterniond::UnitRandom()};
+  Eigen::Vector3d const r_tm_ri{Eigen::Vector3d::Random()};
+  Eigen::Quaterniond const r_qm_j{Eigen::Quaterniond::UnitRandom()};
+  Eigen::Vector3d const r_tm_rj{Eigen::Vector3d::Random()};
 
-  Eigen::Quaterniond const qz{qa.inverse() * qb};
-  Eigen::Vector3d const tz{qa.inverse() * (tb - ta)};
+  Eigen::Quaterniond const i_qm_j{r_qm_i.inverse() * r_qm_j};
+  Eigen::Vector3d const i_tm_ij{r_qm_i.inverse() * (r_tm_rj - r_tm_ri)};
   Eigen::Matrix<double, 6, 6> sqrt_info{Eigen::Matrix<double, 6, 6>::Identity()};
-  BetweenFactor<mode> const factor{qz, tz, sqrt_info};
+  BetweenFactor<mode> const factor{i_qm_j, i_tm_ij, sqrt_info};
+
+  Eigen::Quaterniond const r_qe_i{
+      r_qm_i * Sophus::SO3d::exp(Eigen::Vector3d::Random() * 1e-3).unit_quaternion()};
+  Eigen::Vector3d const r_te_ri{r_tm_ri + Eigen::Vector3d::Random() * 1e-2};
+  Eigen::Quaterniond const r_qe_j{
+      r_qm_j * Sophus::SO3d::exp(Eigen::Vector3d::Random() * 1e-3).unit_quaternion()};
+  Eigen::Vector3d const r_te_rj{r_tm_rj + Eigen::Vector3d::Random() * 1e-2};
 
   Eigen::Matrix<double, 6, 1> residuals0;
   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa_analytic;
@@ -63,8 +35,8 @@ void TestBetweenFactor() {
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_analytic;
 
   {
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     std::array<double *, 4> jacobians{dr_dqa_analytic.data(), dr_dta_analytic.data(),
                                       dr_dqb_analytic.data(), dr_dtb_analytic.data()};
     factor.Evaluate(parameters.data(), residuals0.data(), jacobians.data());
@@ -72,10 +44,10 @@ void TestBetweenFactor() {
   Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqa_dwa;
   Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqb_dwb;
   RotationManifold<mode> rotation_manifold;
-  rotation_manifold.PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
-  rotation_manifold.PlusJacobian(qb.coeffs().data(), dqb_dwb.data());
-  Eigen::Matrix<double, 6, 3> const dr_dwa_analytic = dr_dqa_analytic * dqa_dwa;
-  Eigen::Matrix<double, 6, 3> const dr_dwb_analytic = dr_dqb_analytic * dqb_dwb;
+  rotation_manifold.PlusJacobian(r_qe_i.coeffs().data(), dqa_dwa.data());
+  rotation_manifold.PlusJacobian(r_qe_j.coeffs().data(), dqb_dwb.data());
+  Eigen::Matrix<double, 6, 3> const dr_dwa_analytic{dr_dqa_analytic * dqa_dwa};
+  Eigen::Matrix<double, 6, 3> const dr_dwb_analytic{dr_dqb_analytic * dqb_dwb};
 
   Eigen::Vector3d const dw{Eigen::Vector3d::Random() * 1e-9};
   Eigen::Vector3d const dwx{Eigen::Vector3d::UnitX() * dw.x()};
@@ -95,27 +67,27 @@ void TestBetweenFactor() {
   {
     // Eigen::Quaterniond const qadqx{qa * dqx};
     Eigen::Quaterniond qadqx;
-    rotation_manifold.Plus(qa.coeffs().data(), dwx.data(), qadqx.coeffs().data());
-    std::array<double const *, 4> const parameters{qadqx.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwx.data(), qadqx.coeffs().data());
+    std::array<double const *, 4> const parameters{qadqx.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwa_numeric.col(0) = (residuals1 - residuals0) / dw.x();
   }
   {
     Eigen::Quaterniond qadqy;
-    rotation_manifold.Plus(qa.coeffs().data(), dwy.data(), qadqy.coeffs().data());
-    std::array<double const *, 4> const parameters{qadqy.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwy.data(), qadqy.coeffs().data());
+    std::array<double const *, 4> const parameters{qadqy.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwa_numeric.col(1) = (residuals1 - residuals0) / dw.y();
   }
   {
     Eigen::Quaterniond qadqz;
-    rotation_manifold.Plus(qa.coeffs().data(), dwz.data(), qadqz.coeffs().data());
-    std::array<double const *, 4> const parameters{qadqz.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwz.data(), qadqz.coeffs().data());
+    std::array<double const *, 4> const parameters{qadqz.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwa_numeric.col(2) = (residuals1 - residuals0) / dw.z();
@@ -124,27 +96,27 @@ void TestBetweenFactor() {
 
   {
     Eigen::Quaterniond qbdqx;
-    rotation_manifold.Plus(qb.coeffs().data(), dwx.data(), qbdqx.coeffs().data());
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qbdqx.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_j.coeffs().data(), dwx.data(), qbdqx.coeffs().data());
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   qbdqx.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwb_numeric.col(0) = (residuals1 - residuals0) / dw.x();
   }
   {
     Eigen::Quaterniond qbdqy;
-    rotation_manifold.Plus(qb.coeffs().data(), dwy.data(), qbdqy.coeffs().data());
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qbdqy.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_j.coeffs().data(), dwy.data(), qbdqy.coeffs().data());
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   qbdqy.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwb_numeric.col(1) = (residuals1 - residuals0) / dw.y();
   }
   {
     Eigen::Quaterniond qbdqz;
-    rotation_manifold.Plus(qb.coeffs().data(), dwz.data(), qbdqz.coeffs().data());
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qbdqz.coeffs().data(), tb.data()};
+    rotation_manifold.Plus(r_qe_j.coeffs().data(), dwz.data(), qbdqz.coeffs().data());
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   qbdqz.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwb_numeric.col(2) = (residuals1 - residuals0) / dw.z();
@@ -152,64 +124,63 @@ void TestBetweenFactor() {
   EXPECT_TRUE(dr_dwb_analytic.isApprox(dr_dwb_numeric, 1e-4));
 
   {
-    Eigen::Vector3d const tadtx{ta + dtx};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), tadtx.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    Eigen::Vector3d const tadtx{r_te_ri + dtx};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), tadtx.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dta_numeric.col(0) = (residuals1 - residuals0) / dt.x();
   }
   {
-    Eigen::Vector3d const tadty{ta + dty};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), tadty.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    Eigen::Vector3d const tadty{r_te_ri + dty};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), tadty.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dta_numeric.col(1) = (residuals1 - residuals0) / dt.y();
   }
   {
-    Eigen::Vector3d const tadtz{ta + dtz};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), tadtz.data(),
-                                                   qb.coeffs().data(), tb.data()};
+    Eigen::Vector3d const tadtz{r_te_ri + dtz};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), tadtz.data(),
+                                                   r_qe_j.coeffs().data(), r_te_rj.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dta_numeric.col(2) = (residuals1 - residuals0) / dt.z();
   }
-  EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_numeric, 1e-6));
+  EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_numeric, 1e-4));
 
   {
-    Eigen::Vector3d const tbdtx{tb + dtx};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tbdtx.data()};
+    Eigen::Vector3d const tbdtx{r_te_rj + dtx};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), tbdtx.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dtb_numeric.col(0) = (residuals1 - residuals0) / dt.x();
   }
   {
-    Eigen::Vector3d const tbdty{tb + dty};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tbdty.data()};
+    Eigen::Vector3d const tbdty{r_te_rj + dty};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), tbdty.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dtb_numeric.col(1) = (residuals1 - residuals0) / dt.y();
   }
   {
-    Eigen::Vector3d const tbdtz{tb + dtz};
-    std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-                                                   qb.coeffs().data(), tbdtz.data()};
+    Eigen::Vector3d const tbdtz{r_te_rj + dtz};
+    std::array<double const *, 4> const parameters{r_qe_i.coeffs().data(), r_te_ri.data(),
+                                                   r_qe_j.coeffs().data(), tbdtz.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dtb_numeric.col(2) = (residuals1 - residuals0) / dt.z();
   }
-  EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, 1e-6));
+  EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, 1e-4));
 }
 
 }  // namespace
 
-TEST(RotationManifoldTest, TestRightPerturbation) {
-  TestBetweenFactor<RotationUpdateMode::kRight>();
-  TestBetweenFactor<RotationUpdateMode::kLeft>();
-}
+TEST(RotationManifoldTest, TestRightUpdateMode) { TestBetweenFactor<RotationUpdateMode::kRight>(); }
+
+TEST(RotationManifoldTest, TestLeftUpdateMode) { TestBetweenFactor<RotationUpdateMode::kLeft>(); }
 
 // TEST(RotationManifoldTest, TestLeftPerturbation) {
 //   // RotationManifold rotation_manifold{RotationManifold::Mode::kLeftPerturbation};

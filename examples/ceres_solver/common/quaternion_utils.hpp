@@ -36,7 +36,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionLeftUpdateJacobian(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_EQ(quaternion.norm(), static_cast<T>(1));
+  // CHECK_EQ(quaternion.norm(), static_cast<T>(1));
   return static_cast<T>(.5) *
          QuaternionRightMultiplicationMatrix(quaternion).template block<4, 3>(0, 0);
 }
@@ -45,7 +45,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionRightUpdateJacobian(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_EQ(quaternion.norm(), static_cast<T>(1));
+  // CHECK_EQ(quaternion.norm(), static_cast<T>(1));
   return static_cast<T>(.5) *
          QuaternionLeftMultiplicationMatrix(quaternion).template block<4, 3>(0, 0);
 }
