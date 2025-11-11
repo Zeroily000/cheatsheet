@@ -32,17 +32,21 @@ bool BetweenFunctor<RotationUpdateMode::kRight>::operator()(
   whitened_error = sqrt_info_.cast<T>() * error;
 
   if (jacobians != nullptr) {
+    Eigen::Matrix<T, 6, 6> const dr_de{sqrt_info_.cast<T>()};
+    Eigen::Matrix<T, 3, 4> const dwi_dqi{QuaternionRightUpdateJacobianInverse(r_qe_i)};
+    Eigen::Matrix<T, 3, 4> const dwj_dqj{QuaternionRightUpdateJacobianInverse(r_qe_j)};
     if (jacobians[0] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwi;
       // d/dwi e_w = Jr^{-1}(e_w)·i_R_j^{-1}
       de_dwi.template block<3, 3>(0, 0) =
-          Sophus::SO3<T>::leftJacobianInverse(error.template head<3>()) *
-          i_qm_j_.cast<T>().inverse().toRotationMatrix();
+          Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
+          i_qm_j_.inverse().toRotationMatrix().cast<T>();
       // d/dwi e_t = -r_R_j^{-1}·r_R_i·[i_t_ij]x
-      de_dwi.template block<3, 3>(3, 0) = j_qe_i * Sophus::SO3<T>::hat(-i_tm_ij_.cast<T>());
+      de_dwi.template block<3, 3>(3, 0) =
+          j_qe_i.toRotationMatrix() * Sophus::SO3<T>::hat(-i_tm_ij_.cast<T>());
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwi{jacobians[0]};
-      dr_dwi = sqrt_info_.cast<T>() * de_dwi * QuaternionRightUpdateJacobianInverse(r_qe_i);
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dqi{jacobians[0]};
+      dr_dqi = dr_de * de_dwi * dwi_dqi;
     }
     if (jacobians[1] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dti;
@@ -52,7 +56,7 @@ bool BetweenFunctor<RotationUpdateMode::kRight>::operator()(
       de_dti.template block<3, 3>(3, 0) = j_qe_r.toRotationMatrix();
 
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dti{jacobians[1]};
-      dr_dti = sqrt_info_.cast<T>() * de_dti;
+      dr_dti = dr_de * de_dti;
     }
     if (jacobians[2] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwj;
@@ -62,8 +66,8 @@ bool BetweenFunctor<RotationUpdateMode::kRight>::operator()(
       // d/dwj e_t = [e_t]x
       de_dwj.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
 
-      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwj{jacobians[2]};
-      dr_dwj = sqrt_info_.cast<T>() * de_dwj * QuaternionRightUpdateJacobianInverse(r_qe_j);
+      Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dqj{jacobians[2]};
+      dr_dqj = dr_de * de_dwj * dwj_dqj;
     }
     if (jacobians[3] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dtj;
@@ -73,7 +77,7 @@ bool BetweenFunctor<RotationUpdateMode::kRight>::operator()(
       de_dtj.template block<3, 3>(3, 0) = -j_qe_r.toRotationMatrix();
 
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtj{jacobians[3]};
-      dr_dtj = sqrt_info_.cast<T>() * de_dtj;
+      dr_dtj = dr_de * de_dtj;
     }
   }
   return true;
@@ -182,17 +186,3 @@ ceres::CostFunction * BetweenFactor<mode>::Create(Eigen::Quaterniond const & i_q
   }
   return nullptr;
 }
-
-// template <RotationUpdateMode mode>
-// bool BetweenFunctor<mode>::operator()(T const * parameter0, T const * parameter1,
-//                                      T const * parameter2, T const * parameter3, T * residuals,
-//                                      T ** jacobians = nullptr) const {
-//   Eigen::Map<Eigen::Quaterniond const> const r_qe_i{parameters[0]};
-//   Eigen::Map<Eigen::Vector3d const> const r_te_ri{parameters[1]};
-//   Eigen::Map<Eigen::Quaterniond const> const r_qe_j{parameters[2]};
-//   Eigen::Map<Eigen::Vector3d const> const r_te_rj{parameters[3]};
-//   Eigen::Map<Eigen::Matrix<double, 6, 1>> whitened_error{residuals};
-//   return Evaluate(r_qe_i, r_te_ri, r_qe_j, r_te_rj, i_qm_j_, i_tm_ij_, sqrt_info_,
-//   whitened_error,
-//                   jacobians);
-// }

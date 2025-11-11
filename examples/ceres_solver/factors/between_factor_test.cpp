@@ -11,9 +11,11 @@ namespace {
 
 template <RotationUpdateMode mode>
 void TestBetweenFactor() {
-  Eigen::Quaterniond const r_qm_i{Eigen::Quaterniond::UnitRandom()};
+  static double constexpr kTolerance{1e-4};
+  std::srand(0);
+  Eigen::Quaterniond const r_qm_i{Sophus::SO3d::exp(Eigen::Vector3d::Random()).unit_quaternion()};
   Eigen::Vector3d const r_tm_ri{Eigen::Vector3d::Random()};
-  Eigen::Quaterniond const r_qm_j{Eigen::Quaterniond::UnitRandom()};
+  Eigen::Quaterniond const r_qm_j{Sophus::SO3d::exp(Eigen::Vector3d::Random()).unit_quaternion()};
   Eigen::Vector3d const r_tm_rj{Eigen::Vector3d::Random()};
 
   Eigen::Quaterniond const i_qm_j{r_qm_i.inverse() * r_qm_j};
@@ -65,7 +67,6 @@ void TestBetweenFactor() {
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_numeric;
 
   {
-    // Eigen::Quaterniond const qadqx{qa * dqx};
     Eigen::Quaterniond qadqx;
     rotation_manifold.Plus(r_qe_i.coeffs().data(), dwx.data(), qadqx.coeffs().data());
     std::array<double const *, 4> const parameters{qadqx.coeffs().data(), r_te_ri.data(),
@@ -92,7 +93,7 @@ void TestBetweenFactor() {
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwa_numeric.col(2) = (residuals1 - residuals0) / dw.z();
   }
-  EXPECT_TRUE(dr_dwa_analytic.isApprox(dr_dwa_numeric, 1e-4));
+  EXPECT_TRUE(dr_dwa_analytic.isApprox(dr_dwa_numeric, kTolerance));
 
   {
     Eigen::Quaterniond qbdqx;
@@ -121,7 +122,7 @@ void TestBetweenFactor() {
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dwb_numeric.col(2) = (residuals1 - residuals0) / dw.z();
   }
-  EXPECT_TRUE(dr_dwb_analytic.isApprox(dr_dwb_numeric, 1e-4));
+  EXPECT_TRUE(dr_dwb_analytic.isApprox(dr_dwb_numeric, kTolerance));
 
   {
     Eigen::Vector3d const tadtx{r_te_ri + dtx};
@@ -147,7 +148,7 @@ void TestBetweenFactor() {
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dta_numeric.col(2) = (residuals1 - residuals0) / dt.z();
   }
-  EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_numeric, 1e-4));
+  EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_numeric, kTolerance));
 
   {
     Eigen::Vector3d const tbdtx{r_te_rj + dtx};
@@ -173,7 +174,7 @@ void TestBetweenFactor() {
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dtb_numeric.col(2) = (residuals1 - residuals0) / dt.z();
   }
-  EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, 1e-4));
+  EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_numeric, kTolerance));
 }
 
 }  // namespace
@@ -181,67 +182,3 @@ void TestBetweenFactor() {
 TEST(RotationManifoldTest, TestRightUpdateMode) { TestBetweenFactor<RotationUpdateMode::kRight>(); }
 
 TEST(RotationManifoldTest, TestLeftUpdateMode) { TestBetweenFactor<RotationUpdateMode::kLeft>(); }
-
-// TEST(RotationManifoldTest, TestLeftPerturbation) {
-//   // RotationManifold rotation_manifold{RotationManifold::Mode::kLeftPerturbation};
-//   Eigen::Quaterniond const qa{Eigen::Quaterniond::UnitRandom()};
-//   Eigen::Vector3d const ta{Eigen::Vector3d::Random()};
-//   Eigen::Quaterniond const qb{Eigen::Quaterniond::UnitRandom()};
-//   Eigen::Vector3d const tb{Eigen::Vector3d::Random()};
-//   std::array<double const *, 4> const parameters{qa.coeffs().data(), ta.data(),
-//   qb.coeffs().data(),
-//                                                  tb.data()};
-
-//   Eigen::Quaterniond const qz{qa.inverse() * qb};
-//   Eigen::Vector3d const tz{qa.inverse() * (tb - ta)};
-//   Eigen::Matrix<double, 6, 6> sqrt_info{Eigen::Matrix<double, 6, 6>::Identity()};
-//   // BetweenFactor<RotationUpdateMode::kLeft> const factor{qz, tz, sqrt_info};
-//   ceres::CostFunction const * const analytic_factor{
-//       BetweenFactor<RotationUpdateMode::kLeft>::Create(qz, tz, sqrt_info,
-//                                                        JacobianComputationMethod::kAnalytic)};
-
-//   Eigen::Matrix<double, 6, 1> residuals;
-//   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dwa_analytic;
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dta_analytic;
-//   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dwb_analytic;
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_analytic;
-
-//   {
-//     std::array<double *, 4> jacobians{dr_dwa_analytic.data(), dr_dta_analytic.data(),
-//                                       dr_dwb_analytic.data(), dr_dtb_analytic.data()};
-//     analytic_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
-//   }
-
-//   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqa;
-//   Eigen::Matrix<double, 6, 4, Eigen::RowMajor> dr_dqb;
-//   Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqa_dwa;
-//   Eigen::Matrix<double, 4, 3, Eigen::RowMajor> dqb_dwb;
-//   auto const * manifold{new ceres::EigenQuaternionManifold};
-//   manifold->PlusJacobian(qa.coeffs().data(), dqa_dwa.data());
-//   manifold->PlusJacobian(qb.coeffs().data(), dqb_dwb.data());
-
-//   // auto const * autodiff_factor = AutoDiffBetweenFactor::Create(qz, tz, sqrt_info);
-//   ceres::CostFunction const * const autodiff_factor{
-//       BetweenFactor<RotationUpdateMode::kLeft>::Create(qz, tz, sqrt_info,
-//                                                        JacobianComputationMethod::kAutomatic)};
-
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwa_autodiff;
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dwb_autodiff;
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dta_autodiff;
-//   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dtb_autodiff;
-//   {
-//     std::array<double *, 4> jacobians{dr_dqa.data(), dr_dta_autodiff.data(), dr_dqb.data(),
-//                                       dr_dtb_autodiff.data()};
-//     autodiff_factor->Evaluate(parameters.data(), residuals.data(), jacobians.data());
-//     dr_dwa_autodiff = dr_dqa * dqa_dwa * .5;
-//     dr_dwb_autodiff = dr_dqb * dqb_dwb * .5;
-//   }
-//   EXPECT_TRUE(dr_dwa_analytic.leftCols(3).isApprox(dr_dwa_autodiff));
-//   EXPECT_TRUE(dr_dwb_analytic.leftCols(3).isApprox(dr_dwb_autodiff));
-//   EXPECT_TRUE(dr_dta_analytic.isApprox(dr_dta_autodiff));
-//   EXPECT_TRUE(dr_dtb_analytic.isApprox(dr_dtb_autodiff));
-
-//   delete manifold;
-//   delete analytic_factor;
-//   delete autodiff_factor;
-// }
