@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ceres/ceres.h>
 
 #include <Eigen/Core>
@@ -153,3 +155,5 @@ class BetweenFactor : public ceres::SizedCostFunction<6, 4, 3, 4, 3> {
  private:
   BetweenFunctor<mode> functor_;
 };
+
+#include "examples/ceres_solver/factors/between_factor.hpp"

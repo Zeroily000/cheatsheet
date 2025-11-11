@@ -4,8 +4,8 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "between_factor",
-    srcs = ["between_factor.h"],
-    hdrs = ["between_factor.hpp"],
+    srcs = ["between_factor.hpp"],
+    hdrs = ["between_factor.h"],
     deps = [
         "//examples/ceres_solver/common:quaternion_utils",
         "//examples/ceres_solver/common:types",

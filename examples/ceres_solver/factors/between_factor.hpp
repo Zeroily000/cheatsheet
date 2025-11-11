@@ -1,9 +1,6 @@
-#pragma once
-
 #include <sophus/so3.hpp>
 
 #include "examples/ceres_solver/common/quaternion_utils.hpp"
-#include "examples/ceres_solver/factors/between_factor.h"
 
 template <RotationUpdateMode mode>
 BetweenFunctor<mode>::BetweenFunctor(Eigen::Quaterniond i_qm_j, Eigen::Vector3d i_tm_ij,

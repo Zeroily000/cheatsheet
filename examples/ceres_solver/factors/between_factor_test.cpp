@@ -1,4 +1,4 @@
-#include "examples/ceres_solver/factors/between_factor.hpp"
+#include "examples/ceres_solver/factors/between_factor.h"
 
 #include <gtest/gtest.h>
 
