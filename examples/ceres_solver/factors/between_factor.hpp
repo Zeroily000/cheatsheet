@@ -30,49 +30,49 @@ bool BetweenFunctor<RotationUpdateMode::kRight>::operator()(
 
   if (jacobians != nullptr) {
     Eigen::Matrix<T, 6, 6> const dr_de{sqrt_info_.cast<T>()};
-    Eigen::Matrix<T, 3, 4> const dwi_dqi{QuaternionRightUpdateJacobianInverse(r_qe_i)};
-    Eigen::Matrix<T, 3, 4> const dwj_dqj{QuaternionRightUpdateJacobianInverse(r_qe_j)};
     if (jacobians[0] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwi;
-      // d/dwi e_w = Jr^{-1}(e_w)·i_R_j^{-1}
+      // dew/dwi = Jr^{-1}(ew)·i_R_j^{-1}
       de_dwi.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
           i_qm_j_.inverse().toRotationMatrix().cast<T>();
-      // d/dwi e_t = -r_R_j^{-1}·r_R_i·[i_t_ij]x
+      // det/dwi = -r_R_j^{-1}·r_R_i·[i_t_ij]x
       de_dwi.template block<3, 3>(3, 0) =
           j_qe_i.toRotationMatrix() * Sophus::SO3<T>::hat(-i_tm_ij_.cast<T>());
-
+      // dr/dqi = dr/de·de/dwi·dwi/dqi
+      Eigen::Matrix<T, 3, 4> const dwi_dqi{QuaternionRightUpdateJacobianInverse(r_qe_i)};
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dqi{jacobians[0]};
       dr_dqi = dr_de * de_dwi * dwi_dqi;
     }
     if (jacobians[1] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dti;
-      // d/dti e_w = 0
+      // dew/dti = 0
       de_dti.template block<3, 3>(0, 0).setZero();
-      // d/dti e_t = r_R_j^{-1}
+      // det/dti = r_R_j^{-1}
       de_dti.template block<3, 3>(3, 0) = j_qe_r.toRotationMatrix();
-
+      // dr/dti = dr/de·de/dti
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dti{jacobians[1]};
       dr_dti = dr_de * de_dti;
     }
     if (jacobians[2] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwj;
-      // d/dwj e_w = -Jl^{-1}(e_w)
+      // dew/dwj = -Jl^{-1}(e_w)
       de_dwj.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>());
-      // d/dwj e_t = [e_t]x
+      // det/dwj = [e_t]x
       de_dwj.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
-
+      // dr/dqj = dr/de·de/dwj·dwj/dqj
+      Eigen::Matrix<T, 3, 4> const dwj_dqj{QuaternionRightUpdateJacobianInverse(r_qe_j)};
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dqj{jacobians[2]};
       dr_dqj = dr_de * de_dwj * dwj_dqj;
     }
     if (jacobians[3] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dtj;
-      // d/dtj e_w = 0
+      // dew/dtj = 0
       de_dtj.template block<3, 3>(0, 0).setZero();
-      // d/dtj e_t = -r_R_j^{-1}
+      // det/dtj = -r_R_j^{-1}
       de_dtj.template block<3, 3>(3, 0) = -j_qe_r.toRotationMatrix();
-
+      // dr/dtj = dr/de·de/dtj
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtj{jacobians[3]};
       dr_dtj = dr_de * de_dtj;
     }
@@ -94,60 +94,63 @@ bool BetweenFunctor<RotationUpdateMode::kLeft>::operator()(
   Eigen::Quaternion<T> const j_qe_r{r_qe_j.inverse()};
   Eigen::Quaternion<T> const i_qe_r{r_qe_i.inverse()};
   Eigen::Matrix<T, 6, 1> error;
-  // e_w = Log(i_R_j·r_R_j^{-1}·r_R_i)
+  // ew = Log(i_R_j·r_R_j^{-1}·r_R_i)
   error.template head<3>() = Sophus::SO3<T>{i_qm_j_.cast<T>() * j_qe_r * r_qe_i}.log();
-  // e_t = i_R_j·r_R_j^{-1}·(r_t_ri - r_t_rj) + i_t_ij
+  // et = i_R_j·r_R_j^{-1}·(r_t_ri - r_t_rj) + i_t_ij
   error.template tail<3>() = i_qm_j_.cast<T>() * j_qe_r * (r_te_ri - r_te_rj) + i_tm_ij_.cast<T>();
 
   whitened_error = sqrt_info_.cast<T>() * error;
 
   if (jacobians != nullptr) {
+    Eigen::Matrix<T, 6, 6> const dr_de{sqrt_info_.cast<T>()};
     if (jacobians[0] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwi;
-      // d/dwi e_w = Jr^{-1}(e_w)·r_R_i^{-1}
+      // dew/dwi = Jr^{-1}(e_w)·r_R_i^{-1}
       de_dwi.template block<3, 3>(0, 0) =
           Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
           i_qe_r.toRotationMatrix();
-      // d/dwi e_t = 0
+      // det/dwi = 0
       de_dwi.template block<3, 3>(3, 0).setZero();
-
+      // dr/dqi = dr/de·de/dwi·dwi/dqi
+      Eigen::Matrix<T, 3, 4> const dwi_dqi{QuaternionLeftUpdateJacobianInverse(r_qe_i)};
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwi{jacobians[0]};
-      dr_dwi = sqrt_info_.cast<T>() * de_dwi * QuaternionLeftUpdateJacobianInverse(r_qe_i);
+      dr_dwi = dr_de * de_dwi * dwi_dqi;
     }
     if (jacobians[1] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dti;
-      // d/dti e_w = 0
+      // dew/dti = 0
       de_dti.template block<3, 3>(0, 0).setZero();
-      // d/dti e_t = i_R_j·r_R_j^{-1}
+      // det/dti = i_R_j·r_R_j^{-1}
       de_dti.template block<3, 3>(3, 0) = (i_qm_j_.cast<T>() * r_qe_j.inverse()).toRotationMatrix();
-
+      // dr/dti = dr/de·de/dti
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dti{jacobians[1]};
-      dr_dti = sqrt_info_.cast<T>() * de_dti;
+      dr_dti = dr_de * de_dti;
     }
     if (jacobians[2] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dwj;
-      // d/dwj e_w = -Jr^{-1}(e_w)·r_R_i^{-1}
+      // dew/dwj = -Jr^{-1}(e_w)·r_R_i^{-1}
       de_dwj.template block<3, 3>(0, 0) =
           -Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>()) *
           i_qe_r.toRotationMatrix();
-      // d/dwj e_t = i_R_j·r_R_j^{-1}·[r_t_ri - r_t_rj]x
+      // det/dwj = i_R_j·r_R_j^{-1}·[r_t_ri - r_t_rj]x
       de_dwj.template block<3, 3>(3, 0) =
           (i_qm_j_.cast<T>() * r_qe_j.inverse()).toRotationMatrix() *
           Sophus::SO3<T>::hat(r_te_ri - r_te_rj);
-
+      // dr/dqj = dr/de·de/dwj·dwj/dqj
+      Eigen::Matrix<T, 3, 4> const dwj_dqj{QuaternionLeftUpdateJacobianInverse(r_qe_j)};
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dwj{jacobians[2]};
-      dr_dwj = sqrt_info_.cast<T>() * de_dwj * QuaternionLeftUpdateJacobianInverse(r_qe_j);
+      dr_dwj = dr_de * de_dwj * dwj_dqj;
     }
     if (jacobians[3] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dtj;
-      // d/dtj e_w = 0
+      // dew/dtj = 0
       de_dtj.template block<3, 3>(0, 0).setZero();
-      // d/dtj e_t = -i_R_j·r_R_j^{-1}
+      // det/dtj = -i_R_j·r_R_j^{-1}
       de_dtj.template block<3, 3>(3, 0) =
           -(i_qm_j_.cast<T>() * r_qe_j.inverse()).toRotationMatrix();
-
+      // dr/dtj = dr/de·de/dtj
       Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dtj{jacobians[3]};
-      dr_dtj = sqrt_info_.cast<T>() * de_dtj;
+      dr_dtj = dr_de * de_dtj;
     }
   }
 

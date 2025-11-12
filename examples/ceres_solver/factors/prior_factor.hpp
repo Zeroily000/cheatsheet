@@ -1,7 +1,7 @@
 #include <Sophus/so3.hpp>
 #include <utility>
 
-#include "examples/ceres_solver/factors/prior_factor.h"
+// #include "examples/ceres_solver/factors/prior_factor.h"
 
 template <RotationUpdateMode mode>
 PriorFunctor<mode>::PriorFunctor(Eigen::Quaterniond r_qm_i, Eigen::Vector3d r_tm_ri,

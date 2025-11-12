@@ -17,8 +17,8 @@ cc_library(
 
 cc_library(
     name = "prior_factor",
-    srcs = ["prior_factor.h"],
-    hdrs = ["prior_factor.hpp"],
+    srcs = ["prior_factor.hpp"],
+    hdrs = ["prior_factor.h"],
     deps = [
         "//examples/ceres_solver/common:quaternion_utils",
         "//examples/ceres_solver/common:types",

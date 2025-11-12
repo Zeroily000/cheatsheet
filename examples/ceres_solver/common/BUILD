@@ -20,9 +20,8 @@ cc_library(
     srcs = ["quaternion_utils.h"],
     hdrs = ["quaternion_utils.hpp"],
     deps = [
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:check",
         "@eigen",
+        "@glog",
         "@sophus",
     ],
 )
