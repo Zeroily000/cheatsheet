@@ -20,6 +20,7 @@ cc_library(
     srcs = ["quaternion_utils.hpp"],
     hdrs = ["quaternion_utils.h"],
     deps = [
+        ":types",
         "@eigen",
         "@glog",
         "@sophus",

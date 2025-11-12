@@ -2,6 +2,8 @@
 
 #include <sophus/so3.hpp>
 
+#include "examples/ceres_solver/common/types.h"
+
 template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 4> QuaternionLeftMultiplicationMatrix(
     Eigen::QuaternionBase<Derived> const & quaternion) {
@@ -32,7 +34,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionLeftUpdateJacobian(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), static_cast<T>(1e-9));
+  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), Constants<T>::kEpsilon);
   return static_cast<T>(.5) *
          QuaternionRightMultiplicationMatrix(quaternion).template block<4, 3>(0, 0);
 }
@@ -41,7 +43,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionRightUpdateJacobian(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), static_cast<T>(1e-9));
+  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), Constants<T>::kEpsilon);
   return static_cast<T>(.5) *
          QuaternionLeftMultiplicationMatrix(quaternion).template block<4, 3>(0, 0);
 }
@@ -50,7 +52,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionLeftUpdateJacobianInverse(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), static_cast<T>(1e-9));
+  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), Constants<T>::kEpsilon);
   return static_cast<T>(2) *
          QuaternionRightMultiplicationMatrix(quaternion.inverse()).template block<3, 4>(0, 0);
 }
@@ -59,7 +61,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionRightUpdateJacobianInverse(
     Eigen::QuaternionBase<Derived> const & quaternion) {
   using T = typename Derived::Scalar;
-  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), static_cast<T>(1e-9));
+  CHECK_NEAR(quaternion.norm(), static_cast<T>(1), Constants<T>::kEpsilon);
   return static_cast<T>(2) *
          QuaternionLeftMultiplicationMatrix(quaternion.inverse()).template block<3, 4>(0, 0);
 }
