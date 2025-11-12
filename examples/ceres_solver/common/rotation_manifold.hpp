@@ -2,7 +2,7 @@
 
 #include <sophus/so3.hpp>
 
-#include "examples/ceres_solver/common/quaternion_utils.hpp"
+#include "examples/ceres_solver/common/quaternion_utils.h"
 #include "examples/ceres_solver/common/rotation_manifold.h"
 
 template <RotationUpdateMode mode>

@@ -1,4 +1,4 @@
-#include "examples/ceres_solver/common/quaternion_utils.hpp"
+#include "examples/ceres_solver/common/quaternion_utils.h"
 
 #include <gtest/gtest.h>
 

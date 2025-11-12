@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
@@ -20,9 +22,9 @@ Eigen::Matrix<typename Derived::Scalar, 4, 4> QuaternionRightMultiplicationMatri
 /**
  * dq(dw)·q0 ≈ (dw/2, 1)·q0
  *           = R(q0)·[dw^T/2, 1]^T
- *           = 0.5 * R(q0)·[I, 0]^T·dw + c
+ *           = 0.5·R(q0)·[I, 0]^T·dw + c
  *
- * J = 0.5 * R(q0)·[I, 0]^T
+ * J = 0.5·R(q0)·[I, 0]^T
  */
 template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionLeftUpdateJacobian(
@@ -31,9 +33,9 @@ Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionLeftUpdateJacobian(
 /**
  * q0·dq(dw) ≈ q0·(dw/2, 1)
  *           = L(q0)·[dw^T/2, 1]^T
- *           = 0.5 * L(q0)·[I, 0]^T·dw + c
+ *           = 0.5·L(q0)·[I, 0]^T·dw + c
  *
- * J = 0.5 * L(q0)·[I, 0]^T
+ * J = 0.5·L(q0)·[I, 0]^T
  */
 template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 3> QuaternionRightUpdateJacobian(
@@ -57,7 +59,7 @@ template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionLeftUpdateJacobianInverse(
     Eigen::QuaternionBase<Derived> const & quaternion);
 
-    /**
+/**
  * @brief Computes the Jacobian of Log(q(w)·q0^{-1}) w.r.t. q at q = q0.
  *
  * Let q1 = q0^{-1}·q = (qv1, qw1) and |Log(q1)| = |w1|, then:
@@ -74,3 +76,5 @@ Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionLeftUpdateJacobianInvers
 template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 3, 4> QuaternionRightUpdateJacobianInverse(
     Eigen::QuaternionBase<Derived> const & quaternion);
+
+#include "examples/ceres_solver/common/quaternion_utils.hpp"

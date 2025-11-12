@@ -17,8 +17,8 @@ cc_library(
 
 cc_library(
     name = "quaternion_utils",
-    srcs = ["quaternion_utils.h"],
-    hdrs = ["quaternion_utils.hpp"],
+    srcs = ["quaternion_utils.hpp"],
+    hdrs = ["quaternion_utils.h"],
     deps = [
         "@eigen",
         "@glog",

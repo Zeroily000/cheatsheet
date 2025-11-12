@@ -1,10 +1,6 @@
-#pragma once
-
 #include <glog/logging.h>
 
 #include <sophus/so3.hpp>
-
-#include "examples/ceres_solver/common/quaternion_utils.h"
 
 template <typename Derived>
 Eigen::Matrix<typename Derived::Scalar, 4, 4> QuaternionLeftMultiplicationMatrix(
