@@ -72,9 +72,6 @@ void TestPriorFactor() {
     dr_dw_numeric.col(2) = (residuals1 - residuals0) / dw.z();
   }
   EXPECT_TRUE(dr_dw_analytic.isApprox(dr_dw_numeric, kTolerance));
-  // std::cout << dr_dw_analytic << std::endl;
-  // std::cout << "-----" << std::endl;
-  // std::cout << dr_dw_numeric << std::endl;
 
   {
     Eigen::Vector3d const tdtx{r_te_ri + dtx};
@@ -98,9 +95,6 @@ void TestPriorFactor() {
     dr_dt_numeric.col(2) = (residuals1 - residuals0) / dt.z();
   }
   EXPECT_TRUE(dr_dt_analytic.isApprox(dr_dt_numeric, kTolerance));
-  // std::cout << dr_dt_analytic << std::endl;
-  // std::cout << "-----" << std::endl;
-  // std::cout << dr_dt_numeric << std::endl;
 }
 
 TEST(PriorFactorTest, TestRightUpdateMode) { TestPriorFactor<RotationUpdateMode::kRight>(); }

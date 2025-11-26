@@ -56,20 +56,19 @@ class PriorFunctor {
    *
    * and Jacobians are
    *
-   * dew/dw = d/dw Log(R·(r_R_i·Exp(dw))^{-1})
-   *        = d/dw Log(R·Exp(-dw)·r_R_i^{-1})
-   *        = d/dw Log(Exp(-R·dw)·R·r_R_i^{-1})
-   *        = d/dw Log(Exp(-R·dw)·Exp(ew))
-   *        = d/dw Log(Exp(ew - Jl^{-1}(ew)R·dw))
-   *        = d/dw (ew - Jl^{-1}(ew)·R·dw)
-   *        = -Jl^{-1}(ew)·R
+   * dew/dw = d/dw Log(R·(Exp(dw)·r_R_i)^{-1})
+   *        = d/dw Log(R·r_R_i^{-1}·Exp(-dw))
+   *        = d/dw Log(Exp(ew)·Exp(-dw))
+   *        = d/dw Log(Exp(ew - Jr^{-1}(ew)·dw))
+   *        = d/dw (ew - Jr^{-1}(ew)·dw)
+   *        = -Jr^{-1}(ew)
    *
-   * det/dw = d/dw (t - R·Exp(-dw)·r_R_i^{-1}·r_t_ri)
-   *        = d/dw (-Exp(-R·dw)·R·r_R_i^{-1}·r_t_ri)
-   *        = d/dw (-(I - [R·dw]x)·R·r_R_i^{-1}·r_t_ri)
-   *        = d/dw ([R·dw]x·R·r_R_i^{-1}·r_t_ri)
-   *        = d/dw -[R·r_R_i^{-1}·r_t_ri]x·R·dw
-   *        = -[R·r_R_i^{-1}·r_t_ri]x·R
+   * det/dw = d/dw (t - R·(Exp(dw)·r_R_i)^{-1}·r_t_ri)
+   *        = d/dw (-R·r_R_i^{-1}·Exp(-dw)·r_t_ri)
+   *        = d/dw (-R·r_R_i^{-1}·(I - [dw]x)·r_t_ri)
+   *        = d/dw (R·r_R_i^{-1}·[dw]x·r_t_ri)
+   *        = d/dw -R·r_R_i^{-1}·[r_t_ri]x·dw
+   *        = -R·r_R_i^{-1}·[r_t_ri]x
    *
    * dew/dt = 0
    *
