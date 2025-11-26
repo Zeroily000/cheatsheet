@@ -48,25 +48,25 @@ void TestPriorFactor() {
   Eigen::Matrix<double, 6, 3, Eigen::RowMajor> dr_dt_numeric;
 
   {
-    Eigen::Quaterniond qadqx;
-    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwx.data(), qadqx.coeffs().data());
-    std::array<double const *, 2> const parameters{qadqx.coeffs().data(), r_te_ri.data()};
+    Eigen::Quaterniond qdqx;
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwx.data(), qdqx.coeffs().data());
+    std::array<double const *, 2> const parameters{qdqx.coeffs().data(), r_te_ri.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dw_numeric.col(0) = (residuals1 - residuals0) / dw.x();
   }
   {
-    Eigen::Quaterniond qadqy;
-    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwy.data(), qadqy.coeffs().data());
-    std::array<double const *, 2> const parameters{qadqy.coeffs().data(), r_te_ri.data()};
+    Eigen::Quaterniond qdqy;
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwy.data(), qdqy.coeffs().data());
+    std::array<double const *, 2> const parameters{qdqy.coeffs().data(), r_te_ri.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dw_numeric.col(1) = (residuals1 - residuals0) / dw.y();
   }
   {
-    Eigen::Quaterniond qadqz;
-    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwz.data(), qadqz.coeffs().data());
-    std::array<double const *, 2> const parameters{qadqz.coeffs().data(), r_te_ri.data()};
+    Eigen::Quaterniond qdqz;
+    rotation_manifold.Plus(r_qe_i.coeffs().data(), dwz.data(), qdqz.coeffs().data());
+    std::array<double const *, 2> const parameters{qdqz.coeffs().data(), r_te_ri.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dw_numeric.col(2) = (residuals1 - residuals0) / dw.z();
@@ -77,22 +77,22 @@ void TestPriorFactor() {
   // std::cout << dr_dw_numeric << std::endl;
 
   {
-    Eigen::Vector3d const tadtx{r_te_ri + dtx};
-    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tadtx.data()};
+    Eigen::Vector3d const tdtx{r_te_ri + dtx};
+    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tdtx.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dt_numeric.col(0) = (residuals1 - residuals0) / dt.x();
   }
   {
-    Eigen::Vector3d const tadty{r_te_ri + dty};
-    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tadty.data()};
+    Eigen::Vector3d const tdty{r_te_ri + dty};
+    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tdty.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dt_numeric.col(1) = (residuals1 - residuals0) / dt.y();
   }
   {
-    Eigen::Vector3d const tadtz{r_te_ri + dtz};
-    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tadtz.data()};
+    Eigen::Vector3d const tdtz{r_te_ri + dtz};
+    std::array<double const *, 2> const parameters{r_qe_i.coeffs().data(), tdtz.data()};
     Eigen::Matrix<double, 6, 1> residuals1;
     factor.Evaluate(parameters.data(), residuals1.data(), nullptr);
     dr_dt_numeric.col(2) = (residuals1 - residuals0) / dt.z();
@@ -105,6 +105,6 @@ void TestPriorFactor() {
 
 TEST(PriorFactorTest, TestRightUpdateMode) { TestPriorFactor<RotationUpdateMode::kRight>(); }
 
-// TEST(PriorFactorTest, TestLeftUpdateMode) { TestPriorFactor<RotationUpdateMode::kLeft>(); }
+TEST(PriorFactorTest, TestLeftUpdateMode) { TestPriorFactor<RotationUpdateMode::kLeft>(); }
 
 }  // namespace

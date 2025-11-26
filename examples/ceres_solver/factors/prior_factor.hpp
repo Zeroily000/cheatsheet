@@ -106,27 +106,24 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
     if (jacobians[0] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dw;
       /**
-       * d/dw ew = d/dw Log(R·(r_R_i·Exp(dw))^{-1})
-       *         = d/dw Log(R·Exp(-dw)·r_R_i^{-1})
-       *         = d/dw Log(Exp(-R·dw)·R·r_R_i^{-1})
-       *         = d/dw Log(Exp(-R·dw)·Exp(ew))
-       *         = d/dw Log(Exp(ew - Jl^{-1}(ew)R·dw))
-       *         = d/dw (ew - Jl^{-1}(ew)·R·dw)
-       *         = -Jl^{-1}(ew)·R
+       * d/dw ew = d/dw Log(R·(Exp(dw)·r_R_i)^{-1})
+       *         = d/dw Log(R·r_R_i^{-1}·Exp(-dw))
+       *         = d/dw Log(Exp(ew)·Exp(-dw))
+       *         = d/dw Log(Exp(ew - Jr^{-1}(ew)·dw))
+       *         = d/dw (ew - Jr^{-1}(ew)·dw)
+       *         = -Jr^{-1}(ew)
        */
       de_dw.template block<3, 3>(0, 0) =
-          -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>()) *
-          r_qm_i_.cast<T>().toRotationMatrix();
+          -Sophus::SO3<T>::leftJacobianInverse(-error.template head<3>());
       /**
-       * d/dw et = d/dw (t - R·Exp(-dw)·r_R_i^{-1}·r_t_ri)
-       *         = d/dw (-Exp(-R·dw)·R·r_R_i^{-1}·r_t_ri)
-       *         = d/dw (-(I - [R·dw]x)·R·r_R_i^{-1}·r_t_ri)
-       *         = d/dw ([R·dw]x·R·r_R_i^{-1}·r_t_ri)
-       *         = d/dw -[R·r_R_i^{-1}·r_t_ri]x·R·dw
-       *         = -[R·r_R_i^{-1}·r_t_ri]x·R
+       * d/dw et = d/dw (t - R·(Exp(dw)·r_R_i)^{-1}·r_t_ri)
+       *         = d/dw (-R·r_R_i^{-1}·Exp(-dw)·r_t_ri)
+       *         = d/dw (-R·r_R_i^{-1}·(I - [dw]x)·r_t_ri)
+       *         = d/dw (R·r_R_i^{-1}·[dw]x·r_t_ri)
+       *         = d/dw -R·r_R_i^{-1}·[r_t_ri]x·dw
+       *         = -R·r_R_i^{-1}·[r_t_ri]x
        */
-      de_dw.template block<3, 3>(3, 0) =
-          Sophus::SO3<T>::hat(e_q * r_te_ri) * r_qm_i_.cast<T>().toRotationMatrix();
+      de_dw.template block<3, 3>(3, 0) = -(e_q * Sophus::SO3<T>::hat(r_te_ri));
 
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dq{jacobians[0]};
       dr_dq = sqrt_info_.cast<T>() * de_dw * QuaternionLeftUpdateJacobianInverse(r_qe_i);
@@ -142,6 +139,9 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
        *         = -R·r_R_i^{-1}
        */
       de_dt.template block<3, 3>(3, 0) = -e_q.toRotationMatrix();
+
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dt{jacobians[1]};
+      dr_dt = sqrt_info_.cast<T>() * de_dt;
     }
   }
   return true;
