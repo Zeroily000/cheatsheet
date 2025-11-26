@@ -93,4 +93,24 @@ class PriorFunctor {
   Eigen::Matrix<double, 6, 6> sqrt_info_;
 };
 
+template <RotationUpdateMode mode>
+class PriorFactor : public ceres::SizedCostFunction<6, 4, 3> {
+ public:
+  PriorFactor(Eigen::Quaterniond const & r_qm_i, Eigen::Vector3d const & r_tm_ri,
+              Eigen::Matrix<double, 6, 6> const & sqrt_info);
+
+  ~PriorFactor() override;
+
+  bool Evaluate(double const * const * parameters, double * residuals,
+                double ** jacobians) const override;
+
+  static ceres::CostFunction * Create(Eigen::Quaterniond const & r_qm_i,
+                                      Eigen::Vector3d const & r_tm_ri,
+                                      Eigen::Matrix<double, 6, 6> const & sqrt_info,
+                                      JacobianComputationMethod const & method);
+
+ private:
+  PriorFunctor<mode> functor_;
+};
+
 #include "examples/ceres_solver/factors/prior_factor.hpp"

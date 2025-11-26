@@ -38,3 +38,14 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "prior_factor_test",
+    srcs = ["prior_factor_test.cpp"],
+    deps = [
+        ":prior_factor",
+        "//examples/ceres_solver/common:rotation_manifold",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)

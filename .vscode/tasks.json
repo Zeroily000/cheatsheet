@@ -146,6 +146,24 @@
             }
         },
         {
+            "label": "Build examples/ceres_solver/factors:prior_factor_test",
+            "type": "bazel",
+            "command": "build",
+            "targets": [
+                "//examples/ceres_solver/factors:prior_factor_test"
+            ],
+            "options": [
+                "--compilation_mode=dbg",
+                "--copt=-O0",
+                "--copt=-g3",
+                "--strip=never"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
             "label": "Build examples/cuda/basic:main",
             "type": "bazel",
             "command": "build",

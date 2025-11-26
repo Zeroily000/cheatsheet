@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include <iostream>
 #include <sophus/so3.hpp>
 
 #include "examples/ceres_solver/common/rotation_manifold.hpp"
@@ -179,6 +178,6 @@ void TestBetweenFactor() {
 
 }  // namespace
 
-TEST(RotationManifoldTest, TestRightUpdateMode) { TestBetweenFactor<RotationUpdateMode::kRight>(); }
+TEST(BetweenFactorTest, TestRightUpdateMode) { TestBetweenFactor<RotationUpdateMode::kRight>(); }
 
-TEST(RotationManifoldTest, TestLeftUpdateMode) { TestBetweenFactor<RotationUpdateMode::kLeft>(); }
+TEST(BetweenFactorTest, TestLeftUpdateMode) { TestBetweenFactor<RotationUpdateMode::kLeft>(); }

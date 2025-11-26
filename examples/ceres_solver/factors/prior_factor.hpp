@@ -1,7 +1,7 @@
-#include <Sophus/so3.hpp>
+#include <sophus/so3.hpp>
 #include <utility>
 
-// #include "examples/ceres_solver/factors/prior_factor.h"
+#include "examples/ceres_solver/common/quaternion_utils.h"
 
 template <RotationUpdateMode mode>
 PriorFunctor<mode>::PriorFunctor(Eigen::Quaterniond r_qm_i, Eigen::Vector3d r_tm_ri,
@@ -30,8 +30,8 @@ bool PriorFunctor<RotationUpdateMode::kRight>::operator()(T const * const parame
    */
   Eigen::Matrix<T, 6, 1> error;
   Eigen::Quaternion<T> const i_qe_r{r_qe_i.inverse()};
-  error.template head<3>(0) = Sophus::SO3{i_qe_r * r_qm_i_.cast<T>()}.log();
-  error.template tail<3>(0) = i_qe_r * (r_tm_ri_.cast<T>() - r_te_ri);
+  error.template head<3>() = Sophus::SO3<T>{i_qe_r * r_qm_i_.cast<T>()}.log();
+  error.template tail<3>() = i_qe_r * (r_tm_ri_.cast<T>() - r_te_ri);
   whitened_error = sqrt_info_.cast<T>() * error;
 
   if (jacobians != nullptr) {
@@ -46,7 +46,7 @@ bool PriorFunctor<RotationUpdateMode::kRight>::operator()(T const * const parame
        *         = -Jl^{-1}(ew)
        */
       de_dw.template block<3, 3>(0, 0) =
-          -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>(0));
+          -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>());
       /**
        * d/dw et = d/dw (Exp(-dw)·r_R_i^{-1}·(t - r_t_ri))
        *         = d/dw (Exp(-dw)·et)
@@ -54,10 +54,10 @@ bool PriorFunctor<RotationUpdateMode::kRight>::operator()(T const * const parame
        *         = d/dw [et]x·dw
        *         = [et]x
        */
-      de_dw.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>(0));
+      de_dw.template block<3, 3>(3, 0) = Sophus::SO3<T>::hat(error.template tail<3>());
 
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dq{jacobians[0]};
-      dr_dq = sqrt_info_.cast<T>() * dr_dw * QuaternionRightUpdateJacobianInverse(r_qe_i);
+      dr_dq = sqrt_info_.cast<T>() * de_dw * QuaternionRightUpdateJacobianInverse(r_qe_i);
     }
     if (jacobians[1] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dt;
@@ -70,6 +70,9 @@ bool PriorFunctor<RotationUpdateMode::kRight>::operator()(T const * const parame
        *         = -r_R_i^{-1}
        */
       de_dt.template block<3, 3>(3, 0) = -i_qe_r.toRotationMatrix();
+
+      Eigen::Map<Eigen::Matrix<T, 6, 3, Eigen::RowMajor>> dr_dt{jacobians[1]};
+      dr_dt = sqrt_info_.cast<T>() * de_dt;
     }
   }
   return true;
@@ -95,8 +98,8 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
   Eigen::Matrix<T, 6, 1> error;
   Eigen::Quaternion<T> const i_qe_r{r_qe_i.inverse()};
   Eigen::Quaternion<T> const e_q{r_qm_i_.cast<T>() * i_qe_r};
-  error.template head<3>(0) = Sophus::SO3{e_q}.log();
-  error.template tail<3>(0) = r_tm_ri_.cast<T>() - e_q * r_te_ri;
+  error.template head<3>() = Sophus::SO3<T>{e_q}.log();
+  error.template tail<3>() = r_tm_ri_.cast<T>() - e_q * r_te_ri;
   whitened_error = sqrt_info_.cast<T>() * error;
 
   if (jacobians != nullptr) {
@@ -112,7 +115,7 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
        *         = -Jl^{-1}(ew)·R
        */
       de_dw.template block<3, 3>(0, 0) =
-          -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>(0)) *
+          -Sophus::SO3<T>::leftJacobianInverse(error.template head<3>()) *
           r_qm_i_.cast<T>().toRotationMatrix();
       /**
        * d/dw et = d/dw (t - R·Exp(-dw)·r_R_i^{-1}·r_t_ri)
@@ -126,7 +129,7 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
           Sophus::SO3<T>::hat(e_q * r_te_ri) * r_qm_i_.cast<T>().toRotationMatrix();
 
       Eigen::Map<Eigen::Matrix<T, 6, 4, Eigen::RowMajor>> dr_dq{jacobians[0]};
-      dr_dq = sqrt_info_.cast<T>() * dr_dw * QuaternionLeftUpdateJacobianInverse(r_qe_i);
+      dr_dq = sqrt_info_.cast<T>() * de_dw * QuaternionLeftUpdateJacobianInverse(r_qe_i);
     }
     if (jacobians[1] != nullptr) {
       Eigen::Matrix<T, 6, 3> de_dt;
@@ -142,4 +145,33 @@ bool PriorFunctor<RotationUpdateMode::kLeft>::operator()(T const * const paramet
     }
   }
   return true;
+}
+
+template <RotationUpdateMode mode>
+PriorFactor<mode>::PriorFactor(Eigen::Quaterniond const & r_qm_i, Eigen::Vector3d const & r_tm_ri,
+                               Eigen::Matrix<double, 6, 6> const & sqrt_info)
+    : functor_{r_qm_i, r_tm_ri, sqrt_info} {}
+
+template <RotationUpdateMode mode>
+PriorFactor<mode>::~PriorFactor() = default;
+
+template <RotationUpdateMode mode>
+bool PriorFactor<mode>::Evaluate(double const * const * const parameters, double * const residuals,
+                                 double ** const jacobians) const {
+  return functor_(parameters[0], parameters[1], residuals, jacobians);
+}
+
+template <RotationUpdateMode mode>
+ceres::CostFunction * PriorFactor<mode>::Create(Eigen::Quaterniond const & r_qm_i,
+                                                Eigen::Vector3d const & r_tm_ri,
+                                                Eigen::Matrix<double, 6, 6> const & sqrt_info,
+                                                JacobianComputationMethod const & method) {
+  if (method == JacobianComputationMethod::kAutomatic) {
+    return new ceres::AutoDiffCostFunction<PriorFunctor<mode>, 6, 4, 3>{
+        new PriorFunctor<mode>{r_qm_i, r_tm_ri, sqrt_info}};
+  }
+  if (method == JacobianComputationMethod::kAnalytic) {
+    return new PriorFactor<mode>{r_qm_i, r_tm_ri, sqrt_info};
+  }
+  return nullptr;
 }
